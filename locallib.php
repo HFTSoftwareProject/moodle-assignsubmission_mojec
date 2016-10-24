@@ -26,7 +26,6 @@
 defined('MOODLE_INTERNAL') || die();
 
 // File area for mojec submission assignment.
-define('ASSIGNSUBMISSION_MOJEC_MAXSUMMARYFILES', 5);
 define('ASSIGNSUBMISSION_MOJEC_FILEAREA', 'submissions_mojec');
 
 /**
@@ -141,11 +140,44 @@ class assign_submission_mojec extends assign_submission_plugin {
 
         // Get the file and post it to our backend.
         $file = reset($files);
-        if ($file) {
-            // TODO Post file to backend
-        }
+        $this->mojec_post_file($file);
 
         return true;
+    }
+
+    private function mojec_post_file($file) {
+        if ($file) {
+            $fpmetadata = stream_get_meta_data($file->get_content_file_handle());
+            $fileuri = $fpmetadata["uri"];
+            $filename = $file->get_filename();
+            $curl = curl_init("http://localhost:8080/v1/task");
+            $curlfile = curl_file_create($fileuri, null, $filename);
+            $filedata = array('taskFile' => $curlfile);
+
+            $headers = array("Content-Type:multipart/form-data");
+            curl_setopt($curl, CURLOPT_HEADER, $headers);
+            curl_setopt($curl, CURLOPT_POST, true); // enable posting
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $filedata);
+            curl_exec($curl);
+            if (!curl_errno($curl)) {
+                $info = curl_getinfo($curl);
+                if ($info['http_code'] == 200)
+                    $errmsg = "File uploaded successfully";
+            } else {
+                $errmsg = curl_error($curl);
+            }
+            curl_close($curl);
+        }
+    }
+
+    private function mojec_get_results() {
+        $curl = curl_init("http://localhost:8080/v1/results");
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        $result = curl_exec($curl);
+        curl_close($curl);
+        if ($result) {
+            return $result;
+        }
     }
 
     /**
@@ -158,15 +190,12 @@ class assign_submission_mojec extends assign_submission_plugin {
     public function view_summary(stdClass $submission, & $showviewlink) {
         $count = $this->count_files($submission->id, ASSIGNSUBMISSION_MOJEC_FILEAREA);
 
-        // Show we show a link to view all files for this plugin?
-        $showviewlink = $count > ASSIGNSUBMISSION_MOJEC_MAXSUMMARYFILES;
-        if ($count <= ASSIGNSUBMISSION_MOJEC_MAXSUMMARYFILES) {
-            return $this->assignment->render_area_files('assignsubmission_mojec',
-                ASSIGNSUBMISSION_MOJEC_FILEAREA,
-                $submission->id);
-        } else {
-            return get_string('countfiles', 'assignsubmission_mojec', $count);
-        }
+        $result = $this->assignment->render_area_files('assignsubmission_mojec',
+            ASSIGNSUBMISSION_MOJEC_FILEAREA,
+            $submission->id);
+        $result .= "<br>";
+        $result .= $this->mojec_get_results();
+        return $result;
     }
 
     /**
