@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
  * @param int $oldversion
  * @return bool
  */
-function xmldb_assignsubmission_onlinetext_upgrade($oldversion) {
+function xmldb_assignsubmission_mojec_upgrade($oldversion) {
     global $CFG;
 
     // Moodle v2.8.0 release upgrade line.
