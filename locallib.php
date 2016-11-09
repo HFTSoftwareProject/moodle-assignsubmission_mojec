@@ -96,7 +96,6 @@ class assign_submission_mojec extends assign_submission_plugin {
      * @return int
      */
     private function count_files($submissionid, $area) {
-
         $fs = get_file_storage();
         $files = $fs->get_area_files($this->assignment->get_context()->id,
             'assignsubmission_mojec',
@@ -152,7 +151,9 @@ class assign_submission_mojec extends assign_submission_plugin {
             $filename = $file->get_filename();
             $curl = curl_init("http://localhost:8080/v1/task");
             $curlfile = curl_file_create($fileuri, null, $filename);
-            $filedata = array('taskFile' => $curlfile);
+            $filedata = array(
+                'taskFile' => $curlfile,
+                'user' => $this->get_user_json());
 
             $headers = array("Content-Type:multipart/form-data");
             curl_setopt($curl, CURLOPT_HEADER, $headers);
@@ -168,6 +169,19 @@ class assign_submission_mojec extends assign_submission_plugin {
             }
             curl_close($curl);
         }
+    }
+
+    private function get_user_json() {
+        global $USER;
+
+        $userjson = json_encode(array(
+            "email" => $USER->email,
+            "id" => $USER->id,
+            "userName" => $USER->username,
+            "firstName" => $USER->firstname,
+            "lastName" => $USER->lastname));
+
+        return $userjson;
     }
 
     private function mojec_get_results() {
