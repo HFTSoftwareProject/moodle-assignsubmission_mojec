@@ -195,15 +195,48 @@ class assign_submission_mojec extends assign_submission_plugin {
     }
 
     /**
-     * Display the list of files  in the submission status table
+     * Display the test results of the submission.
      *
      * @param stdClass $submission
      * @param bool $showviewlink Set this to true if the list of files is long
      * @return string
      */
     public function view_summary(stdClass $submission, & $showviewlink) {
-        $count = $this->count_files($submission->id, ASSIGNSUBMISSION_MOJEC_FILEAREA);
+        global $PAGE;
 
+        // $count = $this->count_files($submission->id, ASSIGNSUBMISSION_MOJEC_FILEAREA);
+
+        if ($PAGE->url->get_param("action") == "grading") {
+            return $this->view_grading_summary($submission, $showviewlink);
+        } else {
+            return $this->view_student_summary($submission, $showviewlink);
+        }
+    }
+
+    /**
+     * Returns the view that should be displayed in the grading table.
+     *
+     * @param stdClass $submission
+     * @param bool $showviewlink
+     * @return string
+     */
+    private function view_grading_summary(stdClass $submission, & $showviewlink) {
+        $result = $this->assignment->render_area_files('assignsubmission_mojec',
+            ASSIGNSUBMISSION_MOJEC_FILEAREA,
+            $submission->id);
+        $result .= "<br>";
+        $result .= $this->mojec_get_results();
+        return $result;
+    }
+
+    /**
+     * Returns the view that should be displayed to the student.
+     *
+     * @param stdClass $submission
+     * @param bool $showviewlink
+     * @return string
+     */
+    private function view_student_summary(stdClass $submission, & $showviewlink) {
         $result = $this->assignment->render_area_files('assignsubmission_mojec',
             ASSIGNSUBMISSION_MOJEC_FILEAREA,
             $submission->id);
