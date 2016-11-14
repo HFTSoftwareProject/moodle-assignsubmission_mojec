@@ -221,6 +221,7 @@ class assign_submission_mojec extends assign_submission_plugin {
      * @return string
      */
     private function view_grading_summary(stdClass $submission, & $showviewlink) {
+        $showviewlink = true;
         $result = $this->assignment->render_area_files('assignsubmission_mojec',
             ASSIGNSUBMISSION_MOJEC_FILEAREA,
             $submission->id);
@@ -237,6 +238,7 @@ class assign_submission_mojec extends assign_submission_plugin {
      * @return string
      */
     private function view_student_summary(stdClass $submission, & $showviewlink) {
+        $showviewlink = true;
         $result = $this->assignment->render_area_files('assignsubmission_mojec',
             ASSIGNSUBMISSION_MOJEC_FILEAREA,
             $submission->id);
@@ -252,9 +254,31 @@ class assign_submission_mojec extends assign_submission_plugin {
      * @return string
      */
     public function view(stdClass $submission) {
-        return $this->assignment->render_area_files('assignsubmission_mojec',
+
+        $result = "Here you'll soon see a detailed overview of the test resulte :)";
+        $result .= "<br><br><br>";
+        $result .= $this->assignment->render_area_files('assignsubmission_mojec',
             ASSIGNSUBMISSION_MOJEC_FILEAREA,
             $submission->id);
+
+        return $result;
+    }
+
+    /**
+     * The assignment has been deleted - cleanup
+     *
+     * @return bool
+     */
+    public function delete_instance() {
+        global $DB;
+        //TODO Delete everything, first failures then testresults, then the whole mojec record
+
+
+        // Will throw exception on failure.
+//        $DB->delete_records('assignsubmission_mojec',
+//            array('assignment'=>$this->assignment->get_instance()->id));
+
+        return true;
     }
 
     /**
