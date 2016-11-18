@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/assign/submission/mojec/db" VERSION="20161113" COMMENT="XMLDB file for Moodle mod/assign/submission/mojec"
+<XMLDB PATH="mod/assign/submission/mojec/db" VERSION="20161118" COMMENT="XMLDB file for Moodle mod/assign/submission/mojec"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../../lib/xmldb/xmldb.xsd"
 >
@@ -22,6 +22,7 @@
         <FIELD NAME="testname" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="The name of the test, corresponds to the filename of the Junit test file"/>
         <FIELD NAME="testcount" TYPE="int" LENGTH="3" NOTNULL="false" SEQUENCE="false" COMMENT="The overall number of tests, inclusively the failed ones."/>
         <FIELD NAME="mojec_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="succtests" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Comma separated list of the successful test names"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -35,6 +36,20 @@
         <FIELD NAME="testheader" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="message" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="trace" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="fk_testresult" TYPE="foreign" FIELDS="testresult_id" REFTABLE="mojec_testresult" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="mojec_compilationerror" COMMENT="Default comment for the table, please edit me">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="testresult_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="columnnumber" TYPE="int" LENGTH="4" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="linenumber" TYPE="int" LENGTH="5" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="message" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="position" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The character offset from the beginning of the source object that indicates the location of the problem."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
