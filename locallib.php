@@ -271,12 +271,23 @@ class assign_submission_mojec extends assign_submission_plugin {
      */
     public function delete_instance() {
         global $DB;
-        //TODO Delete everything, first failures then testresults, then the whole mojec record
+        $assignmentid = $this->assignment->get_instance()->id;
 
+        $mojecid = $DB->get_record("assignsubmission_mojec", array('assignment_id' => $assignmentid), "id");
 
-        // Will throw exception on failure.
-//        $DB->delete_records('assignsubmission_mojec',
-//            array('assignment'=>$this->assignment->get_instance()->id));
+        $testresult = $DB->get_record("mojec_testresult", array("mojec_id" => $mojecid));
+
+        // Delete compilation errors.
+        $DB->delete_records("mojec_compilationerror", array("testresult_id" => $testresult->id));
+
+        // Delete test failures.
+        $DB->delete_records("mojec_testfailure", array("testresult_id" => $testresult->id));
+
+        // Delete test results.
+        $DB->delete_records("mojec_testresult", array("mojec_id" => $mojecid));
+
+        // Delete mojec assignment.
+        $DB->delete_records("assignsubmission_mojec", array("assignment_id" => $assignmentid));
 
         return true;
     }
