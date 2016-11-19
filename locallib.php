@@ -28,6 +28,13 @@ defined('MOODLE_INTERNAL') || die();
 // File area for mojec submission assignment.
 define('ASSIGNSUBMISSION_MOJEC_FILEAREA', 'submissions_mojec');
 
+
+// Database table names.
+define("TABLE_ASSIGNSUBMISSION_MOJEC", "assignsubmission_mojec");
+define("TABLE_MOJEC_TESTRESULT", "mojec_testresult");
+define("TABLE_MOJEC_TESTFAILURE", "mojec_testfailure");
+define("TABLE_MOJEC_COMPILATIONERROR", "mojec_compilationerror");
+
 /**
  * library class for mojec submission plugin extending submission plugin base class
  *
@@ -43,6 +50,17 @@ class assign_submission_mojec extends assign_submission_plugin {
      */
     public function get_name() {
         return get_string('mojec', 'assignsubmission_mojec');
+    }
+
+    /**
+     * Get mojec submission information from the database
+     *
+     * @param int $submissionid
+     * @return mixed
+     */
+    private function get_mojec_submission($submissionid) {
+        global $DB;
+        return $DB->get_record(TABLE_ASSIGNSUBMISSION_MOJEC, array('submission_id'=>$submissionid));
     }
 
     /**
@@ -115,7 +133,7 @@ class assign_submission_mojec extends assign_submission_plugin {
      * @return bool
      */
     public function save(stdClass $submission, stdClass $data) {
-        global $OUTPUT;
+        global $OUTPUT, $DB;
 
         $fileoptions = $this->get_file_options();
 
@@ -137,38 +155,99 @@ class assign_submission_mojec extends assign_submission_plugin {
             false);
 
 
+        $mojecsubmission = $this->get_mojec_submission($submission->id);
+
+        if ($mojecsubmission) {
+            // If there are old results, delete them.
+            $this->delete_test_data($mojecsubmission->id);
+        } else {
+            $mojecsubmission = new stdClass();
+            $mojecsubmission->submission_id = $submission->id;
+            $mojecsubmission->assignment_id = $this->assignment->get_instance()->id;
+            $mojecsubmission->id = $DB->insert_record(TABLE_ASSIGNSUBMISSION_MOJEC, $mojecsubmission);
+        }
+
+
         // Get the file and post it to our backend.
         $file = reset($files);
-        $this->mojec_post_file($file);
+        $response = $this->mojec_post_file($file);
+
+        if (!isset($response)) {
+            return false;
+        }
+        $results = json_decode($response);
+        $testresults = $results->testResults;
+        foreach ($testresults as $tr) {
+            // Test result
+            $testresult = new stdClass();
+            $testresult->testname = $tr->testName;
+            $testresult->testcount = $tr->testCount;
+            $testresult->succtests = implode(",", $tr->successfulTests);
+            $testresult->mojec_id = $mojecsubmission->id;
+
+            $testresult->id = $DB->insert_record(TABLE_MOJEC_TESTRESULT, $testresult);
+
+            // Test failure
+            $testfailures = $tr->testFailures;
+            foreach ($testfailures as $tf) {
+                $testfailure = new stdClass();
+                $testfailure->testheader = $tf->testHeader;
+                $testfailure->message = $tf->message;
+                $testfailure->trace = $tf->trace;
+                $testfailure->testresult_id = $testresult->id;
+
+                $testfailure->id = $DB->insert_record(TABLE_MOJEC_TESTFAILURE, $testfailure);
+            }
+
+
+
+
+        }
+
+        $compilationerrors = $results->compilationErrors;
+        foreach ($compilationerrors as $ce) {
+            // Compilation error
+            $compilationerror = new stdClass();
+            $compilationerror->columnnumber = $ce->columnNumber;
+            $compilationerror->linenumber = $ce->lineNumber;
+            $compilationerror->message = $ce->message;
+            $compilationerror->position = $ce->position;
+            $compilationerror->mojec_id = $mojecsubmission->id;
+
+            $compilationerror->id = $DB->insert_record(TABLE_MOJEC_COMPILATIONERROR, $compilationerror);
+        }
 
         return true;
     }
 
     private function mojec_post_file($file) {
-        if ($file) {
-            $fpmetadata = stream_get_meta_data($file->get_content_file_handle());
-            $fileuri = $fpmetadata["uri"];
-            $filename = $file->get_filename();
-            $curl = curl_init("http://localhost:8080/v1/task");
-            $curlfile = curl_file_create($fileuri, null, $filename);
-            $filedata = array(
-                'taskFile' => $curlfile,
-                'user' => $this->get_user_json());
-
-            $headers = array("Content-Type:multipart/form-data");
-            curl_setopt($curl, CURLOPT_HEADER, $headers);
-            curl_setopt($curl, CURLOPT_POST, true); // enable posting
-            curl_setopt($curl, CURLOPT_POSTFIELDS, $filedata);
-            curl_exec($curl);
-            if (!curl_errno($curl)) {
-                $info = curl_getinfo($curl);
-                if ($info['http_code'] == 200)
-                    $errmsg = "File uploaded successfully";
-            } else {
-                $errmsg = curl_error($curl);
-            }
-            curl_close($curl);
+        if (!isset($file)) {
+            return;
         }
+
+        $fpmetadata = stream_get_meta_data($file->get_content_file_handle());
+        $fileuri = $fpmetadata["uri"];
+        $filename = $file->get_filename();
+        $curl = curl_init("http://localhost:8080/v1/task");
+        $curlfile = curl_file_create($fileuri, null, $filename);
+
+        $filedata = array(
+            'taskFile' => $curlfile,
+            'user' => $this->get_user_json()
+        );
+
+
+        $options = array(
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $filedata,
+            CURLOPT_RETURNTRANSFER => true
+        );
+        curl_setopt_array($curl, $options);
+
+        $response = curl_exec($curl);
+        curl_close($curl);
+
+        return $response;
     }
 
     private function get_user_json() {
@@ -221,12 +300,25 @@ class assign_submission_mojec extends assign_submission_plugin {
      * @return string
      */
     private function view_grading_summary(stdClass $submission, & $showviewlink) {
+        global $DB;
         $showviewlink = true;
-        $result = $this->assignment->render_area_files('assignsubmission_mojec',
-            ASSIGNSUBMISSION_MOJEC_FILEAREA,
-            $submission->id);
+
+        $mojecsubmission = $DB->get_record(TABLE_ASSIGNSUBMISSION_MOJEC, array("submission_id" => $submission->id));
+        $testresults = $DB->get_records(TABLE_MOJEC_TESTRESULT, array("mojec_id" => $mojecsubmission->id));
+        $testcount = 0;
+        $succcount = 0;
+        foreach ($testresults as $tr) {
+            $testcount += $tr->testcount;
+            $succcount += substr_count($tr->succtests, ",");
+        }
+        $comperrorcount = $DB->count_records(TABLE_MOJEC_COMPILATIONERROR, array("mojec_id" => $mojecsubmission->id));
+
+
+        $result = "Comp. Err.: " . $comperrorcount;
         $result .= "<br>";
-        $result .= $this->mojec_get_results();
+        $result .= "Tests: " . $succcount . "/" . $testcount;
+        $result = html_writer::div($result, "submissionmojecgrading");
+
         return $result;
     }
 
@@ -275,16 +367,7 @@ class assign_submission_mojec extends assign_submission_plugin {
 
         $mojecid = $DB->get_record("assignsubmission_mojec", array('assignment_id' => $assignmentid), "id");
 
-        $testresult = $DB->get_record("mojec_testresult", array("mojec_id" => $mojecid));
-
-        // Delete compilation errors.
-        $DB->delete_records("mojec_compilationerror", array("testresult_id" => $testresult->id));
-
-        // Delete test failures.
-        $DB->delete_records("mojec_testfailure", array("testresult_id" => $testresult->id));
-
-        // Delete test results.
-        $DB->delete_records("mojec_testresult", array("mojec_id" => $mojecid));
+        $this->delete_test_data($mojecid);
 
         // Delete mojec assignment.
         $DB->delete_records("assignsubmission_mojec", array("assignment_id" => $assignmentid));
@@ -292,9 +375,28 @@ class assign_submission_mojec extends assign_submission_plugin {
         return true;
     }
 
+    private function delete_test_data($mojecid) {
+        global $DB;
+
+        $testresult = $DB->get_record("mojec_testresult", array("mojec_id" => $mojecid));
+
+        // Delete compilation errors.
+        $DB->delete_records("mojec_compilationerror", array("mojec_id" => $mojecid));
+
+        // Delete test failures.
+        $DB->delete_records("mojec_testfailure", array("testresult_id" => $testresult->id));
+
+        // Delete test results.
+        $DB->delete_records("mojec_testresult", array("mojec_id" => $mojecid));
+
+        return true;
+    }
+
     /**
      * Return true if there are no submission files
+     *
      * @param stdClass $submission
+     * @return bool
      */
     public function is_empty(stdClass $submission) {
         return $this->count_files($submission->id, ASSIGNSUBMISSION_MOJEC_FILEAREA) == 0;
