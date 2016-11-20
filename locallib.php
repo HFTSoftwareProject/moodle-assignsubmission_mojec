@@ -330,13 +330,7 @@ class assign_submission_mojec extends assign_submission_plugin {
      * @return string
      */
     private function view_student_summary(stdClass $submission, & $showviewlink) {
-        $showviewlink = true;
-        $result = $this->assignment->render_area_files('assignsubmission_mojec',
-            ASSIGNSUBMISSION_MOJEC_FILEAREA,
-            $submission->id);
-        $result .= "<br>";
-        $result .= $this->mojec_get_results();
-        return $result;
+        return $this->view_grading_summary($submission, $showviewlink);
     }
 
     /**
@@ -346,14 +340,79 @@ class assign_submission_mojec extends assign_submission_plugin {
      * @return string
      */
     public function view(stdClass $submission) {
+        global $DB;
+        $html = "";
 
-        $result = "Here you'll soon see a detailed overview of the test resulte :)";
-        $result .= "<br><br><br>";
-        $result .= $this->assignment->render_area_files('assignsubmission_mojec',
+        $html .= $this->assignment->render_area_files('assignsubmission_mojec',
             ASSIGNSUBMISSION_MOJEC_FILEAREA,
             $submission->id);
 
-        return $result;
+        $mojecsubmission = $DB->get_record(TABLE_ASSIGNSUBMISSION_MOJEC, array("submission_id" => $submission->id));
+        $testresults = $DB->get_records(TABLE_MOJEC_TESTRESULT, array("mojec_id" => $mojecsubmission->id));
+        $testcount = 0;
+        $succcount = 0;
+        foreach ($testresults as $tr) {
+            $html = html_writer::div($tr->testname);
+
+            if ($tr->succtests) {
+                $html .= html_writer::tag("h5", "Successful Tests");
+                $html .= html_writer::alist(explode(",", $tr->succtests));
+            }
+
+            $testfailures = $DB->get_records(TABLE_MOJEC_TESTFAILURE, array("testresult_id" => $tr->id));
+            if ($testfailures) {
+                $html .= html_writer::tag("h5", "Failed Tests");
+
+                foreach ($testfailures as $tf) {
+                    $tmpdiv = html_writer::div("Testheader:", "failedtestsidebar");
+                    $tmpdiv .= html_writer::div($tf->testheader, "failedtestcontent");
+                    $html .= html_writer::div($tmpdiv, "failedTestWrapper");
+
+                    $tmpdiv = html_writer::div("Message:", "failedtestsidebar");
+                    $tmpdiv .= html_writer::div($tf->message, "failedtestcontent");
+                    $html .= html_writer::div($tmpdiv, "failedTestWrapper");
+
+                    $tmpdiv = html_writer::div("Trace:", "failedtestsidebar");
+                    if ($tf->trace) {
+                        $tmpdiv .= html_writer::start_div("failedtestcontent");
+                        $checkbid = html_writer::random_id();
+                        $tmpdiv .= html_writer::label("show trace", $checkbid, false, array("class" => "collapsible"));
+                        $tmpdiv .= html_writer::checkbox(null, null, false, null, array("id" => $checkbid));
+                        $tmpdiv .= html_writer::div($tf->trace);
+                        $tmpdiv .= html_writer::end_div();
+                    } else {
+                        $tmpdiv .= html_writer::div("no trace", "failedtestcontent");
+                    }
+                    $html .= html_writer::div($tmpdiv, "failedTestWrapper");
+                }
+
+            }
+            $html = html_writer::div($html);
+        }
+
+        $compilationerrors = $DB->get_records(TABLE_MOJEC_COMPILATIONERROR, array("mojec_id" => $mojecsubmission->id));
+        if ($compilationerrors) {
+            $html .= html_writer::tag("h5", "Compilation errors");
+            foreach ($compilationerrors as $ce) {
+                $tmpdiv = html_writer::div("Message:", "failedtestsidebar");
+                $tmpdiv .= html_writer::div($ce->message, "failedtestcontent");
+                $html .= html_writer::div($tmpdiv, "failedTestWrapper");
+
+                $tmpdiv = html_writer::div("Column-No.:", "failedtestsidebar");
+                $tmpdiv .= html_writer::div($ce->columnnumber, "failedtestcontent");
+                $html .= html_writer::div($tmpdiv, "failedTestWrapper");
+
+                $tmpdiv = html_writer::div("Line-No.:", "failedtestsidebar");
+                $tmpdiv .= html_writer::div($ce->linenumber, "failedtestcontent");
+                $html .= html_writer::div($tmpdiv, "failedTestWrapper");
+
+                $tmpdiv = html_writer::div("Position:", "failedtestsidebar");
+                $tmpdiv .= html_writer::div($ce->position, "failedtestcontent");
+                $html .= html_writer::div($tmpdiv, "failedTestWrapper");
+            }
+        }
+
+        return $html;
     }
 
     /**

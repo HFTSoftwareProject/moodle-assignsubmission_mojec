@@ -1,3 +1,42 @@
+/* Prevent word breaking in the grading table */
 div.submissionmojecgrading {
     white-space: nowrap;
+}
+
+
+/****************************************************************
+* Layout for the Detail view
+****************************************************************/
+div.failedTestWrapper {
+    overflow: auto;
+}
+
+div.failedtestcontent {
+    float: right;
+    width: 85%;
+    background-color: #CCF;
+}
+
+div.failedtestsidebar {
+    float: left;
+    width: 15%;
+    background-color: #FFA;
+}
+
+/****************************************************************
+* Collapser for the stacktrace
+****************************************************************/
+.collapsible {
+    cursor: pointer;
+    display: block;
+    background: #cdf;
+}
+.collapsible + input{
+    display: none; /* hide the checkboxes */
+}
+.collapsible + input + div{
+    display:none;
+}
+.collapsible + input:checked + div{
+    display:block;
 }
