@@ -295,7 +295,7 @@ class assign_submission_mojec extends assign_submission_plugin {
         $succcount = 0;
         foreach ($testresults as $tr) {
             $testcount += $tr->testcount;
-            $succcount += substr_count($tr->succtests, ",");
+            $succcount += count($this->split_string(",", $tr->succtests));
         }
         $comperrorcount = $DB->count_records(TABLE_MOJEC_COMPILATIONERROR, array("mojec_id" => $mojecsubmission->id));
 
@@ -306,6 +306,24 @@ class assign_submission_mojec extends assign_submission_plugin {
         $result = html_writer::div($result, "submissionmojecgrading");
 
         return $result;
+    }
+
+    /**
+     * Splits a string by string.
+     *
+     * Behave exactly like {@link explode} apart from returning an
+     * empty array in case string is empty.
+     *
+     * @param string $delimiter the boundary string.
+     * @param string $string the input string.
+     * @return array
+     */
+    private function split_string($delimiter, $string) {
+        if (empty($string)) {
+            return array();
+        } else {
+            return explode($delimiter, $string);
+        }
     }
 
     /**
@@ -375,7 +393,6 @@ class assign_submission_mojec extends assign_submission_plugin {
             }
             $html = html_writer::div($html);
         }
-
         $compilationerrors = $DB->get_records(TABLE_MOJEC_COMPILATIONERROR, array("mojec_id" => $mojecsubmission->id));
         if ($compilationerrors) {
             $html .= html_writer::tag("h5", "Compilation errors");
