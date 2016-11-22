@@ -233,7 +233,6 @@ class assign_submission_mojec extends assign_submission_plugin {
 
         $filedata = array(
             'taskFile' => $curlfile,
-            'user' => $this->get_user_json()
         );
 
 
@@ -248,19 +247,6 @@ class assign_submission_mojec extends assign_submission_plugin {
         curl_close($curl);
 
         return $response;
-    }
-
-    private function get_user_json() {
-        global $USER;
-
-        $userjson = json_encode(array(
-            "email" => $USER->email,
-            "id" => $USER->id,
-            "userName" => $USER->username,
-            "firstName" => $USER->firstname,
-            "lastName" => $USER->lastname));
-
-        return $userjson;
     }
 
     private function mojec_get_results() {
