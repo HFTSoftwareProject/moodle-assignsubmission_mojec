@@ -21,7 +21,10 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'MoJEC';
-$string['mojec'] = "MoJEC";
-$string['countfiles'] = '{$a} files';
+$string["pluginname"] = "MoJEC";
+$string["mojec"] = "MoJEC";
+$string["countfiles"] = "{$a} files";
 
+
+// Settings
+$string["setting_unittests"] = "Unit tests";

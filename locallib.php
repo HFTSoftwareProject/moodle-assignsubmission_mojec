@@ -64,6 +64,50 @@ class assign_submission_mojec extends assign_submission_plugin {
     }
 
     /**
+     * Get the default setting for mojec submission plugin
+     *
+     * @param MoodleQuickForm $mform The form to add elements to
+     * @return void
+     */
+    public function get_settings(MoodleQuickForm $mform) {
+        $name = get_string('setting_unittests', 'assignsubmission_mojec');
+        $fileoptions = $this->get_file_options();
+
+        $mform->addElement('filemanager', 'mojectests', $name, null, $fileoptions);
+    }
+
+    /**
+     * Save the settings for mojec submission plugin
+     *
+     * @param stdClass $data
+     * @return bool
+     */
+    public function save_settings(stdClass $data) {
+        if (isset($data->mojectests)) {
+            file_save_draft_area_files($data->mojectests, $this->assignment->get_context()->id,
+                'assignsubmission_mojec', ASSIGNSUBMISSION_MOJEC_FILEAREA, 0);
+        }
+
+        return true;
+    }
+
+    /**
+     * Allows the plugin to update the defaultvalues passed in to
+     * the settings form (needed to set up draft areas for editor
+     * and filemanager elements)
+     * @param array $defaultvalues
+     */
+    public function data_preprocessing(&$defaultvalues) {
+        $draftitemid = file_get_submitted_draft_itemid('mojectests');
+        file_prepare_draft_area($draftitemid, $this->assignment->get_context()->id,
+            'assignsubmission_mojec', ASSIGNSUBMISSION_MOJEC_FILEAREA,
+            0, array('subdirs' => 0));
+        $defaultvalues['mojectests'] = $draftitemid;
+
+        return;
+    }
+
+    /**
      * File format options
      *
      * @see https://docs.moodle.org/dev/Using_the_File_API_in_Moodle_forms#filemanager
