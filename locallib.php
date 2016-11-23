@@ -443,13 +443,16 @@ class assign_submission_mojec extends assign_submission_plugin {
     private function delete_test_data($mojecid) {
         global $DB;
 
-        $testresult = $DB->get_record("mojec_testresult", array("mojec_id" => $mojecid));
+        $testresultid = $DB->get_record("mojec_testresult", array("mojec_id" => $mojecid), "id", IGNORE_MISSING);
+        if (!$testresultid) {
+            return true;
+        }
 
         // Delete compilation errors.
         $DB->delete_records("mojec_compilationerror", array("mojec_id" => $mojecid));
 
         // Delete test failures.
-        $DB->delete_records("mojec_testfailure", array("testresult_id" => $testresult->id));
+        $DB->delete_records("mojec_testfailure", array("testresult_id" => $testresultid));
 
         // Delete test results.
         $DB->delete_records("mojec_testresult", array("mojec_id" => $mojecid));
