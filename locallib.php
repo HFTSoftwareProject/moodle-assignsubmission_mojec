@@ -98,13 +98,13 @@ class assign_submission_mojec extends assign_submission_plugin {
         $submissionid = $submission ? $submission->id : 0;
 
         $data = file_prepare_standard_filemanager($data,
-            'files',
+            'tasks',
             $fileoptions,
             $this->assignment->get_context(),
             'assignsubmission_mojec',
             ASSIGNSUBMISSION_MOJEC_FILEAREA,
             $submissionid);
-        $mform->addElement('filemanager', 'files_filemanager', $this->get_name(), null, $fileoptions);
+        $mform->addElement('filemanager', 'tasks_filemanager', $this->get_name(), null, $fileoptions);
 
         return true;
     }
@@ -141,7 +141,7 @@ class assign_submission_mojec extends assign_submission_plugin {
         $fileoptions = $this->get_file_options();
 
         $data = file_postupdate_standard_filemanager($data,
-            'files',
+            'tasks',
             $fileoptions,
             $this->assignment->get_context(),
             'assignsubmission_mojec',
