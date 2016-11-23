@@ -66,13 +66,16 @@ class assign_submission_mojec extends assign_submission_plugin {
     /**
      * File format options
      *
+     * @see https://docs.moodle.org/dev/Using_the_File_API_in_Moodle_forms#filemanager
+     *
      * @return array
      */
     private function get_file_options() {
         $fileoptions = array('subdirs'=>1,
             //'maxbytes'=>$this->get_config('maxsubmissionsizebytes'),
             //'maxfiles'=>$this->get_config('maxfilesubmissions'),
-            'accepted_types'=>'*',
+            "maxfiles" => 1,
+            'accepted_types'=> array(".zip"),
             'return_types'=>FILE_INTERNAL);
         if ($fileoptions['maxbytes'] == 0) {
             // Use module default.
