@@ -430,12 +430,12 @@ class assign_submission_mojec extends assign_submission_plugin {
         global $DB;
         $assignmentid = $this->assignment->get_instance()->id;
 
-        $mojecid = $DB->get_record("assignsubmission_mojec", array('assignment_id' => $assignmentid), "id");
+        $mojecid = $DB->get_record(TABLE_ASSIGNSUBMISSION_MOJEC, array('assignment_id' => $assignmentid), "id");
 
         $this->delete_test_data($mojecid);
 
         // Delete mojec assignment.
-        $DB->delete_records("assignsubmission_mojec", array("assignment_id" => $assignmentid));
+        $DB->delete_records(TABLE_ASSIGNSUBMISSION_MOJEC, array("assignment_id" => $assignmentid));
 
         return true;
     }
@@ -443,19 +443,19 @@ class assign_submission_mojec extends assign_submission_plugin {
     private function delete_test_data($mojecid) {
         global $DB;
 
-        $testresultid = $DB->get_record("mojec_testresult", array("mojec_id" => $mojecid), "id", IGNORE_MISSING);
+        $testresultid = $DB->get_record(TABLE_MOJEC_TESTRESULT, array("mojec_id" => $mojecid), "id", IGNORE_MISSING);
         if (!$testresultid) {
             return true;
         }
 
         // Delete compilation errors.
-        $DB->delete_records("mojec_compilationerror", array("mojec_id" => $mojecid));
+        $DB->delete_records(TABLE_MOJEC_COMPILATIONERROR, array("mojec_id" => $mojecid));
 
         // Delete test failures.
-        $DB->delete_records("mojec_testfailure", array("testresult_id" => $testresultid));
+        $DB->delete_records(TABLE_MOJEC_TESTFAILURE, array("testresult_id" => $testresultid));
 
         // Delete test results.
-        $DB->delete_records("mojec_testresult", array("mojec_id" => $mojecid));
+        $DB->delete_records(TABLE_MOJEC_TESTRESULT, array("mojec_id" => $mojecid));
 
         return true;
     }
