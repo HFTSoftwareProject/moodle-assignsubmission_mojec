@@ -290,9 +290,17 @@ class assign_submission_mojec extends assign_submission_plugin {
         return true;
     }
 
+    /**
+     * Posts the file to the url under the given param name.
+     *
+     * @param stored_file $file the file to post.
+     * @param string $url the url to post to.
+     * @param string $paramname the param name for the file.
+     * @return mixed
+     */
     private function mojec_post_file($file, $url, $paramname) {
         if (!isset($file) or !isset($url) or !isset($paramname)) {
-            return;
+            return false;
         }
 
         $fpmetadata = stream_get_meta_data($file->get_content_file_handle());
