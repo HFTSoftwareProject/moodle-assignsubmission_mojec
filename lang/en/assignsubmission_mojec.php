@@ -24,6 +24,8 @@
 $string["pluginname"] = "MoJEC";
 $string["mojec"] = "MoJEC";
 $string["countfiles"] = "{$a} files";
+$string["mojec_submissions"] = "MoJEC Submissions";
+$string["mojec_tests"] = "MoJEC Tests";
 
 
 // Settings
