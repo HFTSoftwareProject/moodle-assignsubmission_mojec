@@ -26,7 +26,11 @@
 defined('MOODLE_INTERNAL') || die();
 
 // File area for mojec submission assignment.
-define('ASSIGNSUBMISSION_MOJEC_FILEAREA', 'submissions_mojec');
+define('ASSIGNSUBMISSION_MOJEC_FILEAREA_SUBMISSION', 'submissions_mojec');
+// File area for mojec tests to be uploaded by the teacher
+define('ASSIGNSUBMISSION_MOJEC_FILEAREA_TEST', 'tests_mojec');
+
+define("COMPONENT_NAME", "assignsubmission_mojec");
 
 
 // Database table names.
@@ -49,7 +53,7 @@ class assign_submission_mojec extends assign_submission_plugin {
      * @return string
      */
     public function get_name() {
-        return get_string('mojec', 'assignsubmission_mojec');
+        return get_string("mojec", COMPONENT_NAME);
     }
 
     /**
@@ -70,7 +74,7 @@ class assign_submission_mojec extends assign_submission_plugin {
      * @return void
      */
     public function get_settings(MoodleQuickForm $mform) {
-        $name = get_string('setting_unittests', 'assignsubmission_mojec');
+        $name = get_string('setting_unittests', COMPONENT_NAME);
         $fileoptions = $this->get_file_options();
 
         $mform->addElement('filemanager', 'mojectests', $name, null, $fileoptions);
@@ -85,7 +89,23 @@ class assign_submission_mojec extends assign_submission_plugin {
     public function save_settings(stdClass $data) {
         if (isset($data->mojectests)) {
             file_save_draft_area_files($data->mojectests, $this->assignment->get_context()->id,
-                'assignsubmission_mojec', ASSIGNSUBMISSION_MOJEC_FILEAREA, 0);
+                COMPONENT_NAME, ASSIGNSUBMISSION_MOJEC_FILEAREA_TEST, 0);
+
+
+            // TODO Only send file to backend if checkbox in settings is checked.
+            $fs = get_file_storage();
+
+
+            $files = $fs->get_area_files($this->assignment->get_context()->id,
+                COMPONENT_NAME,
+                ASSIGNSUBMISSION_MOJEC_FILEAREA_TEST,
+                0,
+                'id',
+                false);
+
+            $file = reset($files);
+            $url = "http://localhost:8080/v1/unittest";
+            $this->mojec_post_file($file, $url, "unitTestFile");
         }
 
         return true;
@@ -100,7 +120,7 @@ class assign_submission_mojec extends assign_submission_plugin {
     public function data_preprocessing(&$defaultvalues) {
         $draftitemid = file_get_submitted_draft_itemid('mojectests');
         file_prepare_draft_area($draftitemid, $this->assignment->get_context()->id,
-            'assignsubmission_mojec', ASSIGNSUBMISSION_MOJEC_FILEAREA,
+            COMPONENT_NAME, ASSIGNSUBMISSION_MOJEC_FILEAREA_TEST,
             0, array('subdirs' => 0));
         $defaultvalues['mojectests'] = $draftitemid;
 
@@ -145,8 +165,8 @@ class assign_submission_mojec extends assign_submission_plugin {
             'tasks',
             $fileoptions,
             $this->assignment->get_context(),
-            'assignsubmission_mojec',
-            ASSIGNSUBMISSION_MOJEC_FILEAREA,
+            COMPONENT_NAME,
+            ASSIGNSUBMISSION_MOJEC_FILEAREA_SUBMISSION,
             $submissionid);
         $mform->addElement('filemanager', 'tasks_filemanager', $this->get_name(), null, $fileoptions);
 
@@ -163,7 +183,7 @@ class assign_submission_mojec extends assign_submission_plugin {
     private function count_files($submissionid, $area) {
         $fs = get_file_storage();
         $files = $fs->get_area_files($this->assignment->get_context()->id,
-            'assignsubmission_mojec',
+            COMPONENT_NAME,
             $area,
             $submissionid,
             'id',
@@ -188,15 +208,15 @@ class assign_submission_mojec extends assign_submission_plugin {
             'tasks',
             $fileoptions,
             $this->assignment->get_context(),
-            'assignsubmission_mojec',
-            ASSIGNSUBMISSION_MOJEC_FILEAREA,
+            COMPONENT_NAME,
+            ASSIGNSUBMISSION_MOJEC_FILEAREA_SUBMISSION,
             $submission->id);
 
         $fs = get_file_storage();
 
         $files = $fs->get_area_files($this->assignment->get_context()->id,
-            'assignsubmission_mojec',
-            ASSIGNSUBMISSION_MOJEC_FILEAREA,
+            COMPONENT_NAME,
+            ASSIGNSUBMISSION_MOJEC_FILEAREA_SUBMISSION,
             $submission->id,
             'id',
             false);
@@ -217,7 +237,8 @@ class assign_submission_mojec extends assign_submission_plugin {
 
         // Get the file and post it to our backend.
         $file = reset($files);
-        $response = $this->mojec_post_file($file);
+        $url = "http://localhost:8080/v1/task";
+        $response = $this->mojec_post_file($file, $url, "taskFile");
 
         if (!isset($response)) {
             return false;
@@ -267,19 +288,19 @@ class assign_submission_mojec extends assign_submission_plugin {
         return true;
     }
 
-    private function mojec_post_file($file) {
-        if (!isset($file)) {
+    private function mojec_post_file($file, $url, $paramname) {
+        if (!isset($file) or !isset($url) or !isset($paramname)) {
             return;
         }
 
         $fpmetadata = stream_get_meta_data($file->get_content_file_handle());
         $fileuri = $fpmetadata["uri"];
         $filename = $file->get_filename();
-        $curl = curl_init("http://localhost:8080/v1/task");
+        $curl = curl_init($url);
         $curlfile = curl_file_create($fileuri, null, $filename);
 
         $filedata = array(
-            'taskFile' => $curlfile,
+            $paramname => $curlfile,
         );
 
 
@@ -316,7 +337,7 @@ class assign_submission_mojec extends assign_submission_plugin {
     public function view_summary(stdClass $submission, & $showviewlink) {
         global $PAGE;
 
-        // $count = $this->count_files($submission->id, ASSIGNSUBMISSION_MOJEC_FILEAREA);
+        // $count = $this->count_files($submission->id, ASSIGNSUBMISSION_MOJEC_FILEAREA_SUBMISSION);
 
         if ($PAGE->url->get_param("action") == "grading") {
             return $this->view_grading_summary($submission, $showviewlink);
@@ -394,8 +415,8 @@ class assign_submission_mojec extends assign_submission_plugin {
         global $DB;
         $html = "";
 
-        $html .= $this->assignment->render_area_files('assignsubmission_mojec',
-            ASSIGNSUBMISSION_MOJEC_FILEAREA,
+        $html .= $this->assignment->render_area_files(COMPONENT_NAME,
+            ASSIGNSUBMISSION_MOJEC_FILEAREA_SUBMISSION,
             $submission->id);
 
         $mojecsubmission = $DB->get_record(TABLE_ASSIGNSUBMISSION_MOJEC, array("submission_id" => $submission->id));
@@ -513,7 +534,7 @@ class assign_submission_mojec extends assign_submission_plugin {
      * @return bool
      */
     public function is_empty(stdClass $submission) {
-        return $this->count_files($submission->id, ASSIGNSUBMISSION_MOJEC_FILEAREA) == 0;
+        return $this->count_files($submission->id, ASSIGNSUBMISSION_MOJEC_FILEAREA_SUBMISSION) == 0;
     }
 
 
@@ -522,7 +543,10 @@ class assign_submission_mojec extends assign_submission_plugin {
      * @return array - An array of fileareas (keys) and descriptions (values)
      */
     public function get_file_areas() {
-        return array(ASSIGNSUBMISSION_MOJEC_FILEAREA => $this->get_name());
+        return array(
+            ASSIGNSUBMISSION_MOJEC_FILEAREA_SUBMISSION => get_string("mojec_submissions", COMPONENT_NAME),
+            ASSIGNSUBMISSION_MOJEC_FILEAREA_TEST => get_string("mojec_tests", COMPONENT_NAME)
+        );
     }
 }
 
