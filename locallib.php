@@ -327,16 +327,6 @@ class assign_submission_mojec extends assign_submission_plugin {
         return $response;
     }
 
-    private function mojec_get_results() {
-        $curl = curl_init("http://localhost:8080/v1/results");
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        $result = curl_exec($curl);
-        curl_close($curl);
-        if ($result) {
-            return $result;
-        }
-    }
-
     /**
      * Display the test results of the submission.
      *
