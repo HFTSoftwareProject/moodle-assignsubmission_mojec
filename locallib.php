@@ -66,7 +66,7 @@ class assign_submission_mojec extends assign_submission_plugin {
      */
     private function get_mojec_submission($submissionid) {
         global $DB;
-        return $DB->get_record(self::TABLE_ASSIGNSUBMISSION_MOJEC, array('submission_id'=>$submissionid));
+        return $DB->get_record(self::TABLE_ASSIGNSUBMISSION_MOJEC, array('submission_id' => $submissionid));
     }
 
     /**
@@ -93,10 +93,8 @@ class assign_submission_mojec extends assign_submission_plugin {
             file_save_draft_area_files($data->mojectests, $this->assignment->get_context()->id,
                 self::COMPONENT_NAME, ASSIGNSUBMISSION_MOJEC_FILEAREA_TEST, 0);
 
-
             // TODO Only send file to backend if checkbox in settings is checked.
             $fs = get_file_storage();
-
 
             $files = $fs->get_area_files($this->assignment->get_context()->id,
                 self::COMPONENT_NAME,
@@ -137,16 +135,10 @@ class assign_submission_mojec extends assign_submission_plugin {
      * @return array
      */
     private function get_file_options() {
-        $fileoptions = array('subdirs'=>1,
-            //'maxbytes'=>$this->get_config('maxsubmissionsizebytes'),
-            //'maxfiles'=>$this->get_config('maxfilesubmissions'),
+        $fileoptions = array('subdirs' => 1,
             "maxfiles" => 1,
-            'accepted_types'=> array(".zip"),
-            'return_types'=>FILE_INTERNAL);
-        if ($fileoptions['maxbytes'] == 0) {
-            // Use module default.
-            //$fileoptions['maxbytes'] = get_config('assignsubmission_file', 'maxbytes');
-        }
+            'accepted_types' => array(".zip"),
+            'return_types' => FILE_INTERNAL);
         return $fileoptions;
     }
 
@@ -202,7 +194,7 @@ class assign_submission_mojec extends assign_submission_plugin {
      * @return bool
      */
     public function save(stdClass $submission, stdClass $data) {
-        global $OUTPUT, $DB;
+        global $DB;
 
         $fileoptions = $this->get_file_options();
 
@@ -223,7 +215,6 @@ class assign_submission_mojec extends assign_submission_plugin {
             'id',
             false);
 
-
         $mojecsubmission = $this->get_mojec_submission($submission->id);
 
         if ($mojecsubmission) {
@@ -236,7 +227,6 @@ class assign_submission_mojec extends assign_submission_plugin {
             $mojecsubmission->id = $DB->insert_record(self::TABLE_ASSIGNSUBMISSION_MOJEC, $mojecsubmission);
         }
 
-
         // Get the file and post it to our backend.
         $file = reset($files);
         $url = "http://localhost:8080/v1/task";
@@ -248,7 +238,7 @@ class assign_submission_mojec extends assign_submission_plugin {
         $results = json_decode($response);
         $testresults = $results->testResults;
         foreach ($testresults as $tr) {
-            // Test result
+            // Test result.
             $testresult = new stdClass();
             $testresult->testname = $tr->testName;
             $testresult->testcount = $tr->testCount;
@@ -257,7 +247,7 @@ class assign_submission_mojec extends assign_submission_plugin {
 
             $testresult->id = $DB->insert_record(self::TABLE_MOJEC_TESTRESULT, $testresult);
 
-            // Test failure
+            // Test failure.
             $testfailures = $tr->testFailures;
             foreach ($testfailures as $tf) {
                 $testfailure = new stdClass();
@@ -268,15 +258,11 @@ class assign_submission_mojec extends assign_submission_plugin {
 
                 $testfailure->id = $DB->insert_record(self::TABLE_MOJEC_TESTFAILURE, $testfailure);
             }
-
-
-
-
         }
 
         $compilationerrors = $results->compilationErrors;
         foreach ($compilationerrors as $ce) {
-            // Compilation error
+            // Compilation error.
             $compilationerror = new stdClass();
             $compilationerror->columnnumber = $ce->columnNumber;
             $compilationerror->linenumber = $ce->lineNumber;
@@ -312,7 +298,6 @@ class assign_submission_mojec extends assign_submission_plugin {
         $filedata = array(
             $paramname => $curlfile,
         );
-
 
         $options = array(
             CURLOPT_POST => true,
@@ -364,7 +349,6 @@ class assign_submission_mojec extends assign_submission_plugin {
             $succcount += count($this->split_string(",", $tr->succtests));
         }
         $comperrorcount = $DB->count_records(self::TABLE_MOJEC_COMPILATIONERROR, array("mojec_id" => $mojecsubmission->id));
-
 
         $result = "Comp. Err.: " . $comperrorcount;
         $result .= "<br>";
