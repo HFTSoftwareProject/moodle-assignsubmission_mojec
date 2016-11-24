@@ -27,17 +27,8 @@ defined('MOODLE_INTERNAL') || die();
 
 // File area for mojec submission assignment.
 define('ASSIGNSUBMISSION_MOJEC_FILEAREA_SUBMISSION', 'submissions_mojec');
-// File area for mojec tests to be uploaded by the teacher
+// File area for mojec tests to be uploaded by the teacher.
 define('ASSIGNSUBMISSION_MOJEC_FILEAREA_TEST', 'tests_mojec');
-
-define("COMPONENT_NAME", "assignsubmission_mojec");
-
-
-// Database table names.
-define("TABLE_ASSIGNSUBMISSION_MOJEC", "assignsubmission_mojec");
-define("TABLE_MOJEC_TESTRESULT", "mojec_testresult");
-define("TABLE_MOJEC_TESTFAILURE", "mojec_testfailure");
-define("TABLE_MOJEC_COMPILATIONERROR", "mojec_compilationerror");
 
 /**
  * library class for mojec submission plugin extending submission plugin base class
@@ -48,12 +39,23 @@ define("TABLE_MOJEC_COMPILATIONERROR", "mojec_compilationerror");
  */
 class assign_submission_mojec extends assign_submission_plugin {
 
+    // Database table names.
+    const TABLE_ASSIGNSUBMISSION_MOJEC = "assignsubmission_mojec";
+    const TABLE_MOJEC_TESTRESULT = "mojec_testresult";
+    const TABLE_MOJEC_TESTFAILURE = "mojec_testfailure";
+    const TABLE_MOJEC_COMPILATIONERROR = "mojec_compilationerror";
+
+    const COMPONENT_NAME = "assignsubmission_mojec";
+
+
+
+
     /**
      * Get the name of the mojec submission plugin
      * @return string
      */
     public function get_name() {
-        return get_string("mojec", COMPONENT_NAME);
+        return get_string("mojec", self::COMPONENT_NAME);
     }
 
     /**
@@ -64,7 +66,7 @@ class assign_submission_mojec extends assign_submission_plugin {
      */
     private function get_mojec_submission($submissionid) {
         global $DB;
-        return $DB->get_record(TABLE_ASSIGNSUBMISSION_MOJEC, array('submission_id'=>$submissionid));
+        return $DB->get_record(self::TABLE_ASSIGNSUBMISSION_MOJEC, array('submission_id'=>$submissionid));
     }
 
     /**
@@ -74,7 +76,7 @@ class assign_submission_mojec extends assign_submission_plugin {
      * @return void
      */
     public function get_settings(MoodleQuickForm $mform) {
-        $name = get_string('setting_unittests', COMPONENT_NAME);
+        $name = get_string('setting_unittests', self::COMPONENT_NAME);
         $fileoptions = $this->get_file_options();
 
         $mform->addElement('filemanager', 'mojectests', $name, null, $fileoptions);
@@ -89,7 +91,7 @@ class assign_submission_mojec extends assign_submission_plugin {
     public function save_settings(stdClass $data) {
         if (isset($data->mojectests)) {
             file_save_draft_area_files($data->mojectests, $this->assignment->get_context()->id,
-                COMPONENT_NAME, ASSIGNSUBMISSION_MOJEC_FILEAREA_TEST, 0);
+                self::COMPONENT_NAME, ASSIGNSUBMISSION_MOJEC_FILEAREA_TEST, 0);
 
 
             // TODO Only send file to backend if checkbox in settings is checked.
@@ -97,7 +99,7 @@ class assign_submission_mojec extends assign_submission_plugin {
 
 
             $files = $fs->get_area_files($this->assignment->get_context()->id,
-                COMPONENT_NAME,
+                self::COMPONENT_NAME,
                 ASSIGNSUBMISSION_MOJEC_FILEAREA_TEST,
                 0,
                 'id',
@@ -120,7 +122,7 @@ class assign_submission_mojec extends assign_submission_plugin {
     public function data_preprocessing(&$defaultvalues) {
         $draftitemid = file_get_submitted_draft_itemid('mojectests');
         file_prepare_draft_area($draftitemid, $this->assignment->get_context()->id,
-            COMPONENT_NAME, ASSIGNSUBMISSION_MOJEC_FILEAREA_TEST,
+            self::COMPONENT_NAME, ASSIGNSUBMISSION_MOJEC_FILEAREA_TEST,
             0, array('subdirs' => 0));
         $defaultvalues['mojectests'] = $draftitemid;
 
@@ -165,7 +167,7 @@ class assign_submission_mojec extends assign_submission_plugin {
             'tasks',
             $fileoptions,
             $this->assignment->get_context(),
-            COMPONENT_NAME,
+            self::COMPONENT_NAME,
             ASSIGNSUBMISSION_MOJEC_FILEAREA_SUBMISSION,
             $submissionid);
         $mform->addElement('filemanager', 'tasks_filemanager', $this->get_name(), null, $fileoptions);
@@ -183,7 +185,7 @@ class assign_submission_mojec extends assign_submission_plugin {
     private function count_files($submissionid, $area) {
         $fs = get_file_storage();
         $files = $fs->get_area_files($this->assignment->get_context()->id,
-            COMPONENT_NAME,
+            self::COMPONENT_NAME,
             $area,
             $submissionid,
             'id',
@@ -208,14 +210,14 @@ class assign_submission_mojec extends assign_submission_plugin {
             'tasks',
             $fileoptions,
             $this->assignment->get_context(),
-            COMPONENT_NAME,
+            self::COMPONENT_NAME,
             ASSIGNSUBMISSION_MOJEC_FILEAREA_SUBMISSION,
             $submission->id);
 
         $fs = get_file_storage();
 
         $files = $fs->get_area_files($this->assignment->get_context()->id,
-            COMPONENT_NAME,
+            self::COMPONENT_NAME,
             ASSIGNSUBMISSION_MOJEC_FILEAREA_SUBMISSION,
             $submission->id,
             'id',
@@ -231,7 +233,7 @@ class assign_submission_mojec extends assign_submission_plugin {
             $mojecsubmission = new stdClass();
             $mojecsubmission->submission_id = $submission->id;
             $mojecsubmission->assignment_id = $this->assignment->get_instance()->id;
-            $mojecsubmission->id = $DB->insert_record(TABLE_ASSIGNSUBMISSION_MOJEC, $mojecsubmission);
+            $mojecsubmission->id = $DB->insert_record(self::TABLE_ASSIGNSUBMISSION_MOJEC, $mojecsubmission);
         }
 
 
@@ -253,7 +255,7 @@ class assign_submission_mojec extends assign_submission_plugin {
             $testresult->succtests = implode(",", $tr->successfulTests);
             $testresult->mojec_id = $mojecsubmission->id;
 
-            $testresult->id = $DB->insert_record(TABLE_MOJEC_TESTRESULT, $testresult);
+            $testresult->id = $DB->insert_record(self::TABLE_MOJEC_TESTRESULT, $testresult);
 
             // Test failure
             $testfailures = $tr->testFailures;
@@ -264,7 +266,7 @@ class assign_submission_mojec extends assign_submission_plugin {
                 $testfailure->trace = $tf->trace;
                 $testfailure->testresult_id = $testresult->id;
 
-                $testfailure->id = $DB->insert_record(TABLE_MOJEC_TESTFAILURE, $testfailure);
+                $testfailure->id = $DB->insert_record(self::TABLE_MOJEC_TESTFAILURE, $testfailure);
             }
 
 
@@ -282,7 +284,7 @@ class assign_submission_mojec extends assign_submission_plugin {
             $compilationerror->position = $ce->position;
             $compilationerror->mojec_id = $mojecsubmission->id;
 
-            $compilationerror->id = $DB->insert_record(TABLE_MOJEC_COMPILATIONERROR, $compilationerror);
+            $compilationerror->id = $DB->insert_record(self::TABLE_MOJEC_COMPILATIONERROR, $compilationerror);
         }
 
         return true;
@@ -337,8 +339,6 @@ class assign_submission_mojec extends assign_submission_plugin {
     public function view_summary(stdClass $submission, & $showviewlink) {
         global $PAGE;
 
-        // $count = $this->count_files($submission->id, ASSIGNSUBMISSION_MOJEC_FILEAREA_SUBMISSION);
-
         if ($PAGE->url->get_param("action") == "grading") {
             return $this->view_grading_summary($submission, $showviewlink);
         } else {
@@ -357,15 +357,15 @@ class assign_submission_mojec extends assign_submission_plugin {
         global $DB;
         $showviewlink = true;
 
-        $mojecsubmission = $DB->get_record(TABLE_ASSIGNSUBMISSION_MOJEC, array("submission_id" => $submission->id));
-        $testresults = $DB->get_records(TABLE_MOJEC_TESTRESULT, array("mojec_id" => $mojecsubmission->id));
+        $mojecsubmission = $DB->get_record(self::TABLE_ASSIGNSUBMISSION_MOJEC, array("submission_id" => $submission->id));
+        $testresults = $DB->get_records(self::TABLE_MOJEC_TESTRESULT, array("mojec_id" => $mojecsubmission->id));
         $testcount = 0;
         $succcount = 0;
         foreach ($testresults as $tr) {
             $testcount += $tr->testcount;
             $succcount += count($this->split_string(",", $tr->succtests));
         }
-        $comperrorcount = $DB->count_records(TABLE_MOJEC_COMPILATIONERROR, array("mojec_id" => $mojecsubmission->id));
+        $comperrorcount = $DB->count_records(self::TABLE_MOJEC_COMPILATIONERROR, array("mojec_id" => $mojecsubmission->id));
 
 
         $result = "Comp. Err.: " . $comperrorcount;
@@ -415,14 +415,12 @@ class assign_submission_mojec extends assign_submission_plugin {
         global $DB;
         $html = "";
 
-        $html .= $this->assignment->render_area_files(COMPONENT_NAME,
+        $html .= $this->assignment->render_area_files(self::COMPONENT_NAME,
             ASSIGNSUBMISSION_MOJEC_FILEAREA_SUBMISSION,
             $submission->id);
 
-        $mojecsubmission = $DB->get_record(TABLE_ASSIGNSUBMISSION_MOJEC, array("submission_id" => $submission->id));
-        $testresults = $DB->get_records(TABLE_MOJEC_TESTRESULT, array("mojec_id" => $mojecsubmission->id));
-        $testcount = 0;
-        $succcount = 0;
+        $mojecsubmission = $DB->get_record(self::TABLE_ASSIGNSUBMISSION_MOJEC, array("submission_id" => $submission->id));
+        $testresults = $DB->get_records(self::TABLE_MOJEC_TESTRESULT, array("mojec_id" => $mojecsubmission->id));
         foreach ($testresults as $tr) {
             $html = html_writer::div($tr->testname);
 
@@ -431,7 +429,7 @@ class assign_submission_mojec extends assign_submission_plugin {
                 $html .= html_writer::alist(explode(",", $tr->succtests));
             }
 
-            $testfailures = $DB->get_records(TABLE_MOJEC_TESTFAILURE, array("testresult_id" => $tr->id));
+            $testfailures = $DB->get_records(self::TABLE_MOJEC_TESTFAILURE, array("testresult_id" => $tr->id));
             if ($testfailures) {
                 $html .= html_writer::tag("h5", "Failed Tests");
 
@@ -461,7 +459,7 @@ class assign_submission_mojec extends assign_submission_plugin {
             }
             $html = html_writer::div($html);
         }
-        $compilationerrors = $DB->get_records(TABLE_MOJEC_COMPILATIONERROR, array("mojec_id" => $mojecsubmission->id));
+        $compilationerrors = $DB->get_records(self::TABLE_MOJEC_COMPILATIONERROR, array("mojec_id" => $mojecsubmission->id));
         if ($compilationerrors) {
             $html .= html_writer::tag("h5", "Compilation errors");
             foreach ($compilationerrors as $ce) {
@@ -495,14 +493,14 @@ class assign_submission_mojec extends assign_submission_plugin {
         global $DB;
         $assignmentid = $this->assignment->get_instance()->id;
 
-        $mojec = $DB->get_record(TABLE_ASSIGNSUBMISSION_MOJEC, array('assignment_id' => $assignmentid), "id");
+        $mojec = $DB->get_record(self::TABLE_ASSIGNSUBMISSION_MOJEC, array('assignment_id' => $assignmentid), "id");
 
         if ($mojec) {
             $this->delete_test_data($mojec->id);
         }
 
         // Delete mojec assignment.
-        $DB->delete_records(TABLE_ASSIGNSUBMISSION_MOJEC, array("assignment_id" => $assignmentid));
+        $DB->delete_records(self::TABLE_ASSIGNSUBMISSION_MOJEC, array("assignment_id" => $assignmentid));
 
         return true;
     }
@@ -510,19 +508,19 @@ class assign_submission_mojec extends assign_submission_plugin {
     private function delete_test_data($mojecid) {
         global $DB;
 
-        $testresult = $DB->get_record(TABLE_MOJEC_TESTRESULT, array("mojec_id" => $mojecid), "id", IGNORE_MISSING);
+        $testresult = $DB->get_record(self::TABLE_MOJEC_TESTRESULT, array("mojec_id" => $mojecid), "id", IGNORE_MISSING);
         if (!$testresult) {
             return true;
         }
 
         // Delete compilation errors.
-        $DB->delete_records(TABLE_MOJEC_COMPILATIONERROR, array("mojec_id" => $mojecid));
+        $DB->delete_records(self::TABLE_MOJEC_COMPILATIONERROR, array("mojec_id" => $mojecid));
 
         // Delete test failures.
-        $DB->delete_records(TABLE_MOJEC_TESTFAILURE, array("testresult_id" => $testresult->id));
+        $DB->delete_records(self::TABLE_MOJEC_TESTFAILURE, array("testresult_id" => $testresult->id));
 
         // Delete test results.
-        $DB->delete_records(TABLE_MOJEC_TESTRESULT, array("mojec_id" => $mojecid));
+        $DB->delete_records(self::TABLE_MOJEC_TESTRESULT, array("mojec_id" => $mojecid));
 
         return true;
     }
@@ -544,8 +542,8 @@ class assign_submission_mojec extends assign_submission_plugin {
      */
     public function get_file_areas() {
         return array(
-            ASSIGNSUBMISSION_MOJEC_FILEAREA_SUBMISSION => get_string("mojec_submissions", COMPONENT_NAME),
-            ASSIGNSUBMISSION_MOJEC_FILEAREA_TEST => get_string("mojec_tests", COMPONENT_NAME)
+            ASSIGNSUBMISSION_MOJEC_FILEAREA_SUBMISSION => get_string("mojec_submissions", self::COMPONENT_NAME),
+            ASSIGNSUBMISSION_MOJEC_FILEAREA_TEST => get_string("mojec_tests", self::COMPONENT_NAME)
         );
     }
 }
