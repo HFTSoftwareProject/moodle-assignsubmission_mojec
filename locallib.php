@@ -47,8 +47,8 @@ class assign_submission_mojec extends assign_submission_plugin {
 
     const COMPONENT_NAME = "assignsubmission_mojec";
 
-
-
+    //const WS_BASE_ADDRESS = "http://10.40.10.5:8080";
+    const WS_BASE_ADDRESS = "http://localhost:8080";
 
     /**
      * Get the name of the mojec submission plugin
@@ -107,7 +107,7 @@ class assign_submission_mojec extends assign_submission_plugin {
                 false);
 
             $file = reset($files);
-            $url = "http://localhost:8080/v1/unittest";
+            $url = self::WS_BASE_ADDRESS . "/v1/unittest";
             $this->mojec_post_file($file, $url, "unitTestFile");
         }
 
@@ -232,7 +232,7 @@ class assign_submission_mojec extends assign_submission_plugin {
 
         // Get the file and post it to our backend.
         $file = reset($files);
-        $url = "http://localhost:8080/v1/task";
+        $url = self::WS_BASE_ADDRESS . "/v1/task";
         $response = $this->mojec_post_file($file, $url, "taskFile");
 
         if (!isset($response)) {
