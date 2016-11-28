@@ -280,6 +280,35 @@ class assign_submission_mojec extends assign_submission_plugin {
     }
 
     /**
+     * Produce a list of files suitable for export that represent this feedback or submission
+     *
+     * @param stdClass $submission The submission
+     * @param stdClass $user The user record - unused
+     * @return array - return an array of files indexed by filename
+     */
+    public function get_files(stdClass $submission, stdClass $user) {
+        $result = array();
+        $fs = get_file_storage();
+
+        $files = $fs->get_area_files($this->assignment->get_context()->id,
+            self::COMPONENT_NAME,
+            ASSIGNSUBMISSION_MOJEC_FILEAREA_SUBMISSION,
+            $submission->id,
+            'timemodified',
+            false);
+
+        foreach ($files as $file) {
+            // Do we return the full folder path or just the file name?
+            if (isset($submission->exportfullpath) && $submission->exportfullpath == false) {
+                $result[$file->get_filename()] = $file;
+            } else {
+                $result[$file->get_filepath().$file->get_filename()] = $file;
+            }
+        }
+        return $result;
+    }
+
+    /**
      * Posts the file to the url under the given param name.
      *
      * @param stored_file $file the file to post.
