@@ -47,8 +47,8 @@ class assign_submission_mojec extends assign_submission_plugin {
 
     const COMPONENT_NAME = "assignsubmission_mojec";
 
-    //const WS_BASE_ADDRESS = "http://10.40.10.5:8080";
-    const WS_BASE_ADDRESS = "http://localhost:8080";
+    const WS_BASE_ADDRESS = "http://10.40.10.5:8080";
+    //const WS_BASE_ADDRESS = "http://localhost:8080";
 
     /**
      * Get the name of the mojec submission plugin
@@ -320,29 +320,15 @@ class assign_submission_mojec extends assign_submission_plugin {
 
         $params = array(
             $paramname     => $file,
+            "assignmentId" => $this->assignment->get_instance()->id
         );
         $options = array(
             "CURLOPT_RETURNTRANSFER" => true
         );
-        $this->set_curl_proxy($options);
         $curl = new curl();
         $response = $curl->post($url, $params, $options);
 
         return $response;
-    }
-
-    /**
-     * Adds the HfT proxy settings, just for development.
-     *
-     * TODO Remove this method in final version
-     *
-     * @param array $options
-     */
-    private function set_curl_proxy(& $options) {
-        if (self::WS_BASE_ADDRESS == "http://10.40.10.5:8080") {
-            $options["CURLOPT_PROXY"] = "proxy.hft-stuttgart.de";
-            $options["CURLOPT_PROXYPORT"] = 80;
-        }
     }
 
     /**
