@@ -79,9 +79,6 @@ class assign_submission_mojec extends assign_submission_plugin {
         $name = get_string('setting_unittests', self::COMPONENT_NAME);
         $fileoptions = $this->get_file_options();
 
-        // TODO For now we accept everything, until backend caught up
-        $fileoptions["accepted_types"] = "*";
-
         $mform->addElement('filemanager', 'mojectests', $name, null, $fileoptions);
     }
 
