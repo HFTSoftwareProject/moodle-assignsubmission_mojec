@@ -47,8 +47,8 @@ class assign_submission_mojec extends assign_submission_plugin {
 
     const COMPONENT_NAME = "assignsubmission_mojec";
 
-    const WS_BASE_ADDRESS = "http://10.40.10.5:8080";
-    //const WS_BASE_ADDRESS = "http://localhost:8080";
+    //const WS_BASE_ADDRESS = "http://10.40.10.5:8080";
+    const WS_BASE_ADDRESS = "http://localhost:8080";
 
     /**
      * Get the name of the mojec submission plugin
@@ -321,26 +321,15 @@ class assign_submission_mojec extends assign_submission_plugin {
             return false;
         }
 
-        $fpmetadata = stream_get_meta_data($file->get_content_file_handle());
-        $fileuri = $fpmetadata["uri"];
-        $filename = $file->get_filename();
-        $curl = curl_init($url);
-        $curlfile = curl_file_create($fileuri, null, $filename);
-
-        $filedata = array(
-            $paramname => $curlfile,
+        $params = array(
+            $paramname     => $file,
         );
-
         $options = array(
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => $filedata,
-            CURLOPT_RETURNTRANSFER => true
+            "CURLOPT_RETURNTRANSFER" => true
         );
         $this->set_curl_proxy($options);
-        curl_setopt_array($curl, $options);
-
-        $response = curl_exec($curl);
-        curl_close($curl);
+        $curl = new curl();
+        $response = $curl->post($url, $params, $options);
 
         return $response;
     }
@@ -354,8 +343,8 @@ class assign_submission_mojec extends assign_submission_plugin {
      */
     private function set_curl_proxy(& $options) {
         if (self::WS_BASE_ADDRESS == "http://10.40.10.5:8080") {
-            $options[CURLOPT_PROXY] = "proxy.hft-stuttgart.de";
-            $options[CURLOPT_PROXYPORT] = 80;
+            $options["CURLOPT_PROXY"] = "proxy.hft-stuttgart.de";
+            $options["CURLOPT_PROXYPORT"] = 80;
         }
     }
 
