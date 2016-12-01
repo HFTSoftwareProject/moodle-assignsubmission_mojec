@@ -277,6 +277,7 @@ class assign_submission_mojec extends assign_submission_plugin {
             $compilationerror->linenumber = $ce->lineNumber;
             $compilationerror->message = $ce->message;
             $compilationerror->position = $ce->position;
+            $compilationerror->filename = $ce->javaFileName;
             $compilationerror->mojec_id = $mojecsubmission->id;
 
             $compilationerror->id = $DB->insert_record(self::TABLE_MOJEC_COMPILATIONERROR, $compilationerror);
@@ -474,6 +475,10 @@ class assign_submission_mojec extends assign_submission_plugin {
         if ($compilationerrors) {
             $html .= html_writer::tag("h6", "Compilation errors");
             foreach ($compilationerrors as $ce) {
+                $tmpdiv = html_writer::div("Filename:", "failedtestsidebar");
+                $tmpdiv .= html_writer::div($ce->filename, "failedtestcontent");
+                $html .= html_writer::div($tmpdiv, "failedTestWrapper");
+
                 $tmpdiv = html_writer::div("Message:", "failedtestsidebar");
                 $tmpdiv .= html_writer::div($ce->message, "failedtestcontent");
                 $html .= html_writer::div($tmpdiv, "failedTestWrapper");

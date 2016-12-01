@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/assign/submission/mojec/db" VERSION="20161119" COMMENT="XMLDB file for Moodle mod/assign/submission/mojec"
+<XMLDB PATH="mod/assign/submission/mojec/db" VERSION="20161201" COMMENT="XMLDB file for Moodle mod/assign/submission/mojec"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../../lib/xmldb/xmldb.xsd"
 >
@@ -50,6 +50,7 @@
         <FIELD NAME="linenumber" TYPE="int" LENGTH="5" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="message" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="position" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The character offset from the beginning of the source object that indicates the location of the problem."/>
+        <FIELD NAME="filename" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
