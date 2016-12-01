@@ -30,3 +30,6 @@ $string["mojec_tests"] = "MoJEC Tests";
 
 // Settings
 $string["setting_unittests"] = "Unit tests";
+// Admin Settings
+$string["default"] = "Enabled by default";
+$string["default_help"] = "If set, this submission method will be enabled by default for all new assignments.";
