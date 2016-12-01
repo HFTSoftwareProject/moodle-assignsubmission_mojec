@@ -416,10 +416,10 @@ class assign_submission_mojec extends assign_submission_plugin {
     }
 
     /**
-     * No full submission view - the summary contains the list of files and that is the whole submission
+     * Shows the test results of the submission.
      *
-     * @param stdClass $submission
-     * @return string
+     * @param stdClass $submission the submission the results are shown for.
+     * @return string the view of the test results as html.
      */
     public function view(stdClass $submission) {
         global $DB;
@@ -432,16 +432,17 @@ class assign_submission_mojec extends assign_submission_plugin {
         $mojecsubmission = $DB->get_record(self::TABLE_ASSIGNSUBMISSION_MOJEC, array("submission_id" => $submission->id));
         $testresults = $DB->get_records(self::TABLE_MOJEC_TESTRESULT, array("mojec_id" => $mojecsubmission->id));
         foreach ($testresults as $tr) {
-            $html = html_writer::div($tr->testname);
+            $testname = html_writer::tag("h5", $tr->testname);
+            $html .= html_writer::div($testname);
 
             if ($tr->succtests) {
-                $html .= html_writer::tag("h5", "Successful Tests");
+                $html .= html_writer::tag("h6", "Successful Tests");
                 $html .= html_writer::alist(explode(",", $tr->succtests));
             }
 
             $testfailures = $DB->get_records(self::TABLE_MOJEC_TESTFAILURE, array("testresult_id" => $tr->id));
             if ($testfailures) {
-                $html .= html_writer::tag("h5", "Failed Tests");
+                $html .= html_writer::tag("h6", "Failed Tests");
 
                 foreach ($testfailures as $tf) {
                     $tmpdiv = html_writer::div("Testheader:", "failedtestsidebar");
@@ -471,7 +472,7 @@ class assign_submission_mojec extends assign_submission_plugin {
         }
         $compilationerrors = $DB->get_records(self::TABLE_MOJEC_COMPILATIONERROR, array("mojec_id" => $mojecsubmission->id));
         if ($compilationerrors) {
-            $html .= html_writer::tag("h5", "Compilation errors");
+            $html .= html_writer::tag("h6", "Compilation errors");
             foreach ($compilationerrors as $ce) {
                 $tmpdiv = html_writer::div("Message:", "failedtestsidebar");
                 $tmpdiv .= html_writer::div($ce->message, "failedtestcontent");
@@ -491,6 +492,7 @@ class assign_submission_mojec extends assign_submission_plugin {
             }
         }
 
+        $html = html_writer::div($html, "mojec_submission_view");
         return $html;
     }
 
