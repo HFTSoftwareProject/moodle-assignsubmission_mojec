@@ -14,3 +14,6 @@ $settings->add(new admin_setting_configcheckbox("assignsubmission_mojec/default"
     new lang_string("default", "assignsubmission_mojec"),
     new lang_string("default_help", "assignsubmission_mojec"), 0));
 
+$settings->add(new admin_setting_configtext("assignsubmission_mojec/wsbase",
+    new lang_string("wsbase", "assignsubmission_mojec"),
+    new lang_string("wsbase_help", "assignsubmission_mojec"), ""));

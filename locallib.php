@@ -47,9 +47,6 @@ class assign_submission_mojec extends assign_submission_plugin {
 
     const COMPONENT_NAME = "assignsubmission_mojec";
 
-    const WS_BASE_ADDRESS = "http://10.40.10.5:8080";
-    //const WS_BASE_ADDRESS = "http://localhost:8080";
-
     /**
      * Get the name of the mojec submission plugin
      * @return string
@@ -103,8 +100,14 @@ class assign_submission_mojec extends assign_submission_plugin {
                 'id',
                 false);
 
+            $wsbaseaddress = get_config(self::COMPONENT_NAME, "wsbase");
+            if (empty($wsbaseaddress)) {
+                \core\notification::error(get_string("wsbase_not_set", self::COMPONENT_NAME));
+                return true;
+            }
+
             $file = reset($files);
-            $url = self::WS_BASE_ADDRESS . "/v1/unittest";
+            $url = $wsbaseaddress . "/v1/unittest";
             $this->mojec_post_file($file, $url, "unitTestFile");
         }
 
@@ -227,9 +230,15 @@ class assign_submission_mojec extends assign_submission_plugin {
             $mojecsubmission->id = $DB->insert_record(self::TABLE_ASSIGNSUBMISSION_MOJEC, $mojecsubmission);
         }
 
+        $wsbaseaddress = get_config(self::COMPONENT_NAME, "wsbase");
+        if (empty($wsbaseaddress)) {
+            \core\notification::error(get_string("wsbase_not_set", self::COMPONENT_NAME));
+            return true;
+        }
+
         // Get the file and post it to our backend.
         $file = reset($files);
-        $url = self::WS_BASE_ADDRESS . "/v1/task";
+        $url = $wsbaseaddress . "/v1/task";
         $response = $this->mojec_post_file($file, $url, "taskFile");
 
         if (!isset($response)) {

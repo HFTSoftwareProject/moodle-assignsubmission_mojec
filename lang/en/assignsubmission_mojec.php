@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'assignsubmission_mojec', language 'en'
+ * Strings for component "assignsubmission_mojec", language "en"
  *
  * @package   assignsubmission_mojec
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -23,13 +23,14 @@
 
 $string["pluginname"] = "MoJEC";
 $string["mojec"] = "MoJEC";
-$string["countfiles"] = "{$a} files";
 $string["mojec_submissions"] = "MoJEC Submissions";
 $string["mojec_tests"] = "MoJEC Tests";
-
-
-// Settings
 $string["setting_unittests"] = "Unit tests";
+$string["wsbase_not_set"] = "The MoJEC web service base URL is not configured.";
+
+
 // Admin Settings
 $string["default"] = "Enabled by default";
 $string["default_help"] = "If set, this submission method will be enabled by default for all new assignments.";
+$string["wsbase"] = "Base URL to the web service";
+$string["wsbase_help"] = "The base URL to the web service, where all the tests and submissions will be sent and evaluated.";
