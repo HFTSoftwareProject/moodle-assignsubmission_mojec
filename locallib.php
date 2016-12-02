@@ -175,25 +175,6 @@ class assign_submission_mojec extends assign_submission_plugin {
     }
 
     /**
-     * Count the number of files
-     *
-     * @param int $submissionid
-     * @param string $area
-     * @return int
-     */
-    private function count_files($submissionid, $area) {
-        $fs = get_file_storage();
-        $files = $fs->get_area_files($this->assignment->get_context()->id,
-            self::COMPONENT_NAME,
-            $area,
-            $submissionid,
-            'id',
-            false);
-
-        return count($files);
-    }
-
-    /**
      * Save data to the database
      *
      * @param stdClass $submission
