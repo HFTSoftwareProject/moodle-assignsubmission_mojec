@@ -226,8 +226,8 @@ class assign_submission_mojec extends assign_submission_plugin {
         $url = $wsbaseaddress . "/v1/task";
         $response = $this->mojec_post_file($file, $url, "taskFile");
 
-        if (!isset($response)) {
-            return false;
+        if (empty($response)) {
+            return true;
         }
         $results = json_decode($response);
         $testresults = $results->testResults;
@@ -322,6 +322,11 @@ class assign_submission_mojec extends assign_submission_plugin {
         );
         $curl = new curl();
         $response = $curl->post($url, $params, $options);
+        $info = $curl->get_info();
+        if (empty($info['http_code']) || $info['http_code'] != 200) {
+            \core\notification::error(get_string("unexpectederror", self::COMPONENT_NAME));
+            return false;
+        }
 
         return $response;
     }

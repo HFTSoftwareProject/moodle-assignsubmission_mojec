@@ -30,6 +30,7 @@ $string['enabled_help'] = "If enabled, students are able to upload one ZIP file 
 $string["setting_unittests"] = "JUnit tests";
 $string["setting_unittests_help"] = "A single ZIP file containg the JUnit tests, the students' submissions should be tested against.";
 $string["wsbase_not_set"] = "The JUnit Exercise Corrector web service base URL is not configured.";
+$string["unexpectederror"] = "An unexpected error occured.";
 
 
 // Admin Settings
