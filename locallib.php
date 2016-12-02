@@ -349,7 +349,7 @@ class assign_submission_mojec extends assign_submission_plugin {
         if ($PAGE->url->get_param("action") == "grading") {
             return $this->view_grading_summary($submission, $showviewlink);
         } else {
-            return $this->view_student_summary($submission, $showviewlink);
+            return $this->view_student_summary($submission);
         }
     }
 
@@ -366,13 +366,20 @@ class assign_submission_mojec extends assign_submission_plugin {
 
         $mojecsubmission = $DB->get_record(self::TABLE_ASSIGNSUBMISSION_MOJEC, array("submission_id" => $submission->id));
         $testresults = $DB->get_records(self::TABLE_MOJEC_TESTRESULT, array("mojec_id" => $mojecsubmission->id));
+        $comperrorcount = $DB->count_records(self::TABLE_MOJEC_COMPILATIONERROR, array("mojec_id" => $mojecsubmission->id));
+        $result = $this->get_short_testresult_overview($testresults, $comperrorcount);
+        $result = html_writer::div($result, "submissionmojecgrading");
+
+        return $result;
+    }
+
+    private function get_short_testresult_overview($testresults, $comperrorcount) {
         $testcount = 0;
         $succcount = 0;
         foreach ($testresults as $tr) {
             $testcount += $tr->testcount;
             $succcount += count($this->split_string(",", $tr->succtests));
         }
-        $comperrorcount = $DB->count_records(self::TABLE_MOJEC_COMPILATIONERROR, array("mojec_id" => $mojecsubmission->id));
 
         $result = "";
         if ($comperrorcount > 0) {
@@ -384,7 +391,6 @@ class assign_submission_mojec extends assign_submission_plugin {
             $percentage = round($succcount / $testcount, 1) * 100;
             $result .= " (" . $percentage . "%)";
         }
-        $result = html_writer::div($result, "submissionmojecgrading");
 
         return $result;
     }
@@ -411,11 +417,10 @@ class assign_submission_mojec extends assign_submission_plugin {
      * Returns the view that should be displayed to the student.
      *
      * @param stdClass $submission
-     * @param bool $showviewlink
      * @return string
      */
-    private function view_student_summary(stdClass $submission, & $showviewlink) {
-        return $this->view_grading_summary($submission, $showviewlink);
+    private function view_student_summary(stdClass $submission) {
+        return $this->view($submission);
     }
 
     /**
@@ -434,6 +439,11 @@ class assign_submission_mojec extends assign_submission_plugin {
 
         $mojecsubmission = $DB->get_record(self::TABLE_ASSIGNSUBMISSION_MOJEC, array("submission_id" => $submission->id));
         $testresults = $DB->get_records(self::TABLE_MOJEC_TESTRESULT, array("mojec_id" => $mojecsubmission->id));
+        $compilationerrors = $DB->get_records(self::TABLE_MOJEC_COMPILATIONERROR, array("mojec_id" => $mojecsubmission->id));
+
+        $html .= html_writer::tag("h5", "Overall results");
+        $html .= $this->get_short_testresult_overview($testresults, count($compilationerrors));
+
         foreach ($testresults as $tr) {
             $testname = html_writer::tag("h5", $tr->testname);
             $html .= html_writer::div($testname);
@@ -473,7 +483,7 @@ class assign_submission_mojec extends assign_submission_plugin {
             }
             $html = html_writer::div($html);
         }
-        $compilationerrors = $DB->get_records(self::TABLE_MOJEC_COMPILATIONERROR, array("mojec_id" => $mojecsubmission->id));
+
         if ($compilationerrors) {
             $html .= html_writer::tag("h6", "Compilation errors");
             foreach ($compilationerrors as $ce) {
