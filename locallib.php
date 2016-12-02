@@ -169,7 +169,12 @@ class assign_submission_mojec extends assign_submission_plugin {
             self::COMPONENT_NAME,
             ASSIGNSUBMISSION_MOJEC_FILEAREA_SUBMISSION,
             $submissionid);
-        $mform->addElement('filemanager', 'tasks_filemanager', $this->get_name(), null, $fileoptions);
+
+        $name = get_string("mojec_submission", self::COMPONENT_NAME);
+        $mform->addElement('filemanager', 'tasks_filemanager', $name, null, $fileoptions);
+        $mform->addHelpButton("tasks_filemanager",
+            "mojec_submission",
+            self::COMPONENT_NAME);
 
         return true;
     }
@@ -574,8 +579,8 @@ class assign_submission_mojec extends assign_submission_plugin {
      */
     public function get_file_areas() {
         return array(
-            ASSIGNSUBMISSION_MOJEC_FILEAREA_SUBMISSION => get_string("mojec_submissions", self::COMPONENT_NAME),
-            ASSIGNSUBMISSION_MOJEC_FILEAREA_TEST => get_string("mojec_tests", self::COMPONENT_NAME)
+            ASSIGNSUBMISSION_MOJEC_FILEAREA_SUBMISSION => get_string("mojec_submissions_fa", self::COMPONENT_NAME),
+            ASSIGNSUBMISSION_MOJEC_FILEAREA_TEST => get_string("mojec_tests_fa", self::COMPONENT_NAME)
         );
     }
 }

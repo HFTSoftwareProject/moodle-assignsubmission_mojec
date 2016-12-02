@@ -23,14 +23,16 @@
 
 $string["pluginname"] = "JUnit Exercise Corrector";
 $string["mojec"] = "JUnit Exercise Corrector";
-$string["mojec_submissions"] = "JUnit Exercise Corrector Submissions";
-$string["mojec_tests"] = "JUnit Exercise Corrector Tests";
+$string["mojec_submissions_fa"] = "JUnit Exercise Corrector Submissions";
+$string["mojec_tests_fa"] = "JUnit Exercise Corrector Tests";
 $string['enabled'] = "JUnit Exercise Corrector";
 $string['enabled_help'] = "If enabled, students are able to upload one ZIP file containing their Java exercise which will then be tested against a teacher provided set of JUnit tests.";
 $string["setting_unittests"] = "JUnit tests";
 $string["setting_unittests_help"] = "A single ZIP file containg the JUnit tests, the students' submissions should be tested against.";
 $string["wsbase_not_set"] = "The JUnit Exercise Corrector web service base URL is not configured.";
 $string["unexpectederror"] = "An unexpected error occured.";
+$string["mojec_submission"] = "Excercise ZIP";
+$string["mojec_submission_help"] = "A single ZIP file containing all the relevant java files and resources for this exercise.";
 
 
 // Admin Settings
