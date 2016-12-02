@@ -21,12 +21,15 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string["pluginname"] = "MoJEC";
-$string["mojec"] = "MoJEC";
-$string["mojec_submissions"] = "MoJEC Submissions";
-$string["mojec_tests"] = "MoJEC Tests";
-$string["setting_unittests"] = "Unit tests";
-$string["wsbase_not_set"] = "The MoJEC web service base URL is not configured.";
+$string["pluginname"] = "JUnit Exercise Corrector";
+$string["mojec"] = "JUnit Exercise Corrector";
+$string["mojec_submissions"] = "JUnit Exercise Corrector Submissions";
+$string["mojec_tests"] = "JUnit Exercise Corrector Tests";
+$string['enabled'] = "JUnit Exercise Corrector";
+$string['enabled_help'] = "If enabled, students are able to upload one ZIP file containing their Java exercise which will then be tested against a teacher provided set of JUnit tests.";
+$string["setting_unittests"] = "JUnit tests";
+$string["setting_unittests_help"] = "A single ZIP file containg the JUnit tests, the students' submissions should be tested against.";
+$string["wsbase_not_set"] = "The JUnit Exercise Corrector web service base URL is not configured.";
 
 
 // Admin Settings

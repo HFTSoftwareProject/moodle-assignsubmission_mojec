@@ -73,10 +73,14 @@ class assign_submission_mojec extends assign_submission_plugin {
      * @return void
      */
     public function get_settings(MoodleQuickForm $mform) {
-        $name = get_string('setting_unittests', self::COMPONENT_NAME);
+        $name = get_string("setting_unittests", self::COMPONENT_NAME);
         $fileoptions = $this->get_file_options();
 
-        $mform->addElement('filemanager', 'mojectests', $name, null, $fileoptions);
+        $mform->addElement("filemanager", "mojectests", $name, null, $fileoptions);
+        $mform->addHelpButton("mojectests",
+            "setting_unittests",
+            "assignsubmission_mojec");
+        $mform->disabledIf('mojectests', 'assignsubmission_mojec_enabled', 'notchecked');
     }
 
     /**
