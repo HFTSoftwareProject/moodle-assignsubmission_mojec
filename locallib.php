@@ -157,10 +157,10 @@ class assign_submission_mojec extends assign_submission_plugin {
      * @param stdClass $data
      * @return bool
      */
-    public function get_form_elements($submission, MoodleQuickForm $mform, stdClass $data) {
+    public function get_form_elements_for_user($submissionorgrade, MoodleQuickForm $mform, stdClass $data, $userid) {
 
         $fileoptions = $this->get_file_options();
-        $submissionid = $submission ? $submission->id : 0;
+        $submissionid = $submissionorgrade ? $submissionorgrade->id : 0;
 
         $data = file_prepare_standard_filemanager($data,
             'tasks',
