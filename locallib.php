@@ -369,9 +369,16 @@ class assign_submission_mojec extends assign_submission_plugin {
         }
         $comperrorcount = $DB->count_records(self::TABLE_MOJEC_COMPILATIONERROR, array("mojec_id" => $mojecsubmission->id));
 
-        $result = "Comp. Err.: " . $comperrorcount;
-        $result .= "<br>";
+        $result = "";
+        if ($comperrorcount > 0) {
+            $result .= "Comp. Err.: " . $comperrorcount;
+            $result .= "<br>";
+        }
         $result .= "Tests: " . $succcount . "/" . $testcount;
+        if ($testcount > 0) {
+            $percentage = round($succcount / $testcount, 1) * 100;
+            $result .= " (" . $percentage . "%)";
+        }
         $result = html_writer::div($result, "submissionmojecgrading");
 
         return $result;
