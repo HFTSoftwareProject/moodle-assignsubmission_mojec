@@ -189,6 +189,10 @@ class assign_submission_mojec extends assign_submission_plugin {
     public function save(stdClass $submission, stdClass $data) {
         global $DB;
 
+        if ($this->is_empty($submission)) {
+            return true;
+        }
+
         $fileoptions = $this->get_file_options();
 
         $data = file_postupdate_standard_filemanager($data,
