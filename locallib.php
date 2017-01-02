@@ -334,6 +334,8 @@ class assign_submission_mojec extends assign_submission_plugin {
         }
 
         // Something went wrong.
+        debugging("MoJEC: Post file to server was not successful: http_code=" . $info["http_code"]);
+
         if ($info['http_code'] == 400) {
             \core\notification::error(get_string("badrequesterror", self::COMPONENT_NAME));
             return false;
