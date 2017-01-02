@@ -327,13 +327,20 @@ class assign_submission_mojec extends assign_submission_plugin {
         );
         $curl = new curl();
         $response = $curl->post($url, $params, $options);
+
         $info = $curl->get_info();
-        if (empty($info['http_code']) || $info['http_code'] != 200) {
+        if ($info["http_code"] == 200) {
+            return $response;
+        }
+
+        // Something went wrong.
+        if ($info['http_code'] == 400) {
+            \core\notification::error(get_string("badrequesterror", self::COMPONENT_NAME));
+            return false;
+        } else {
             \core\notification::error(get_string("unexpectederror", self::COMPONENT_NAME));
             return false;
         }
-
-        return $response;
     }
 
     /**
