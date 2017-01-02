@@ -24,4 +24,5 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->version   = 2016102300;
+$plugin->requires  = 2016052300; // Moodle 3.1
 $plugin->component = 'assignsubmission_mojec';
