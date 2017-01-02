@@ -4,19 +4,19 @@
     xsi:noNamespaceSchemaLocation="../../../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="assignsubmission_mojec" COMMENT="Default comment for assignsubmission_mojec, please edit me">
+    <TABLE NAME="assignsubmission_mojec" COMMENT="Info about JUnit executor submissions for assignments.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="assignment_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="submission_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="fk_assignment" TYPE="foreign" FIELDS="assignment_id" REFTABLE="assign" REFFIELDS="id"/>
-        <KEY NAME="fk_submission" TYPE="foreign" FIELDS="submission_id" REFTABLE="assign_submission" REFFIELDS="id"/>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this submission info."/>
+        <KEY NAME="fk_assignment" TYPE="foreign" FIELDS="assignment_id" REFTABLE="assign" REFFIELDS="id" COMMENT="The assignment instance this submission relates to"/>
+        <KEY NAME="fk_submission" TYPE="foreign" FIELDS="submission_id" REFTABLE="assign_submission" REFFIELDS="id"  COMMENT="The submission this file submission relates to."/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="mojec_testresult" COMMENT="Default comment for the table, please edit me">
+    <TABLE NAME="mojec_testresult" COMMENT="Info about the JUnit executor test results.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="testname" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="The name of the test, corresponds to the filename of the Junit test file"/>
@@ -29,7 +29,7 @@
         <KEY NAME="fk_mojec" TYPE="foreign" FIELDS="mojec_id" REFTABLE="assignsubmission_mojec" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="mojec_testfailure" COMMENT="Default comment for the table, please edit me">
+    <TABLE NAME="mojec_testfailure" COMMENT="Info about the failures occured during test execution.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="testresult_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -42,7 +42,7 @@
         <KEY NAME="fk_testresult" TYPE="foreign" FIELDS="testresult_id" REFTABLE="mojec_testresult" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="mojec_compilationerror" COMMENT="Default comment for the table, please edit me">
+    <TABLE NAME="mojec_compilationerror" COMMENT="Info about compilation errors while trying to compile the test classes.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="mojec_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
