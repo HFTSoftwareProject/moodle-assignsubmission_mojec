@@ -549,6 +549,17 @@ class assign_submission_mojec extends assign_submission_plugin {
         // Delete mojec assignment.
         $DB->delete_records(self::TABLE_ASSIGNSUBMISSION_MOJEC, array("assignment_id" => $assignmentid));
 
+
+        $wsbaseaddress = get_config(self::COMPONENT_NAME, "wsbase");
+        if (empty($wsbaseaddress)) {
+            \core\notification::error(get_string("wsbase_not_set", self::COMPONENT_NAME));
+            return true;
+        }
+
+        $url = $wsbaseaddress . "/v1/unittest?assignmentId=" . $assignmentid;
+        $curl = new curl();
+        $curl->delete($url);
+
         return true;
     }
 
