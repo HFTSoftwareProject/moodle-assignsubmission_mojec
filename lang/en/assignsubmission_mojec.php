@@ -34,7 +34,7 @@ $string["unexpectederror"] = "An unexpected error occured.";
 $string["badrequesterror"] = "The server could not process the request. Probably the submitted ZIP file is corrupted.";
 $string["mojec_submission"] = "Excercise ZIP";
 $string["mojec_submission_help"] = "A single ZIP file containing all the relevant java files and resources for this exercise.";
-
+$string["no_testfile_warning"] = "Submission type is \"JUnit Exercise Corrector\" but no testfiles are uploaded.";
 
 // Admin Settings
 $string["default"] = "Enabled by default";

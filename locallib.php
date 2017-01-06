@@ -104,6 +104,11 @@ class assign_submission_mojec extends assign_submission_plugin {
                 'id',
                 false);
 
+            if (empty($files)) {
+                \core\notification::warning(get_string("no_testfile_warning", self::COMPONENT_NAME));
+                return true;
+            }
+
             $wsbaseaddress = get_config(self::COMPONENT_NAME, "wsbase");
             if (empty($wsbaseaddress)) {
                 \core\notification::error(get_string("wsbase_not_set", self::COMPONENT_NAME));
