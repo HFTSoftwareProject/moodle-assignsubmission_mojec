@@ -72,7 +72,7 @@ Here is an example JSON response after uploading the task Java file.
 }
 ```
 
-The above shows the result of two JUnit test files (CalculatorTest and CalculatorSecondTest). The field “test count” indicates the number of test methods within the test file. The field “Failure count” indicates how many tests have failed and the field “successful test” indicates the method names of passed tests. In case a test failed, the necessary information can be found as an entry in the "testFailures" array.
+The above shows the result of two JUnit test files (CalculatorTest and CalculatorSecondTest). The field “testCount” indicates the number of test methods within the test file. The field “failureCount” indicates how many tests have failed and the field “successfulTest” indicates the method names of passed tests. In case a test failed, the necessary information can be found as an entry in the "testFailures" array.
 
 If there was an compilation error the relevant information is part of the "compilationErrors" array as shown below.
 
