@@ -27,4 +27,4 @@ $plugin->version   = 2017010500;
 $plugin->requires  = 2016052300; // Moodle 3.1
 $plugin->component = 'assignsubmission_mojec';
 $plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = "1.0";
+$plugin->release   = "1.0.0";
