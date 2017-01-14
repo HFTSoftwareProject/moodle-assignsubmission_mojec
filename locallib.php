@@ -116,8 +116,9 @@ class assign_submission_mojec extends assign_submission_plugin {
             }
 
             $file = reset($files);
-            $url = $wsbaseaddress . "/v1/unittest";
-            $this->mojec_post_file($file, $url, "unitTestFile");
+            $assignmentid = $this->assignment->get_instance()->id;
+            $becommun = new assignsubmission_mojec_backend_communication($wsbaseaddress);
+            $becommun->mojec_post_test_file($file, $assignmentid);
         }
 
         return true;
@@ -222,7 +223,7 @@ class assign_submission_mojec extends assign_submission_plugin {
 
         if ($mojecsubmission) {
             // If there are old results, delete them.
-            $this->delete_test_data($mojecsubmission->id);
+            self::delete_test_data($mojecsubmission->id);
             if ($file->get_pathnamehash() != $mojecsubmission->pathnamehash) {
                 $mojecsubmission->pathnamehash = $file->get_pathnamehash();
                 $DB->update_record(self::TABLE_ASSIGNSUBMISSION_MOJEC, $mojecsubmission);
@@ -241,21 +242,30 @@ class assign_submission_mojec extends assign_submission_plugin {
         }
 
         // Post file to our backend.
-        $url = $wsbaseaddress . "/v1/task";
-        $response = $this->mojec_post_file($file, $url, "taskFile");
+        $assignmentid = $this->assignment->get_instance()->id;
+        $becommun = new assignsubmission_mojec_backend_communication($wsbaseaddress);
+        $response = $becommun->mojec_post_task_file($file, $assignmentid);
 
         if (empty($response)) {
             return true;
         }
-        $results = json_decode($response);
-        $testresults = $results->testResults;
+        $jsonresponse = json_decode($response);
+        self::process_json_response($jsonresponse, $mojecsubmission->id);
+
+        return true;
+    }
+
+    public static function process_json_response($jsonresponse, $mojecid) {
+        global $DB;
+
+        $testresults = $jsonresponse->testResults;
         foreach ($testresults as $tr) {
             // Test result.
             $testresult = new stdClass();
             $testresult->testname = $tr->testName;
             $testresult->testcount = $tr->testCount;
             $testresult->succtests = implode(",", $tr->successfulTests);
-            $testresult->mojec_id = $mojecsubmission->id;
+            $testresult->mojec_id = $mojecid;
 
             $testresult->id = $DB->insert_record(self::TABLE_MOJEC_TESTRESULT, $testresult);
 
@@ -281,12 +291,10 @@ class assign_submission_mojec extends assign_submission_plugin {
             $compilationerror->message = $ce->message;
             $compilationerror->position = $ce->position;
             $compilationerror->filename = $ce->javaFileName;
-            $compilationerror->mojec_id = $mojecsubmission->id;
+            $compilationerror->mojec_id = $mojecid;
 
             $compilationerror->id = $DB->insert_record(self::TABLE_MOJEC_COMPILATIONERROR, $compilationerror);
         }
-
-        return true;
     }
 
     /**
@@ -316,46 +324,6 @@ class assign_submission_mojec extends assign_submission_plugin {
             }
         }
         return $result;
-    }
-
-    /**
-     * Posts the file to the url under the given param name.
-     *
-     * @param stored_file $file the file to post.
-     * @param string $url the url to post to.
-     * @param string $paramname the param name for the file.
-     * @return mixed
-     */
-    private function mojec_post_file($file, $url, $paramname) {
-        if (!isset($file) or !isset($url) or !isset($paramname)) {
-            return false;
-        }
-
-        $params = array(
-            $paramname     => $file,
-            "assignmentId" => $this->assignment->get_instance()->id
-        );
-        $options = array(
-            "CURLOPT_RETURNTRANSFER" => true
-        );
-        $curl = new curl();
-        $response = $curl->post($url, $params, $options);
-
-        $info = $curl->get_info();
-        if ($info["http_code"] == 200) {
-            return $response;
-        }
-
-        // Something went wrong.
-        debugging("MoJEC: Post file to server was not successful: http_code=" . $info["http_code"]);
-
-        if ($info['http_code'] == 400) {
-            \core\notification::error(get_string("badrequesterror", self::COMPONENT_NAME));
-            return false;
-        } else {
-            \core\notification::error(get_string("unexpectederror", self::COMPONENT_NAME));
-            return false;
-        }
     }
 
     /**
@@ -547,7 +515,7 @@ class assign_submission_mojec extends assign_submission_plugin {
         $mojec = $DB->get_record(self::TABLE_ASSIGNSUBMISSION_MOJEC, array('assignment_id' => $assignmentid), "id");
 
         if ($mojec) {
-            $this->delete_test_data($mojec->id);
+            self::delete_test_data($mojec->id);
         }
 
         // Delete mojec assignment.
@@ -560,14 +528,13 @@ class assign_submission_mojec extends assign_submission_plugin {
             return true;
         }
 
-        $url = $wsbaseaddress . "/v1/unittest?assignmentId=" . $assignmentid;
-        $curl = new curl();
-        $curl->delete($url);
+        $becommun = new assignsubmission_mojec_backend_communication($wsbaseaddress);
+        $becommun->mojec_delete_files($assignmentid);
 
         return true;
     }
 
-    private function delete_test_data($mojecid) {
+    public static function delete_test_data($mojecid) {
         global $DB;
 
         $testresult = $DB->get_record(self::TABLE_MOJEC_TESTRESULT, array("mojec_id" => $mojecid), "id", IGNORE_MISSING);
