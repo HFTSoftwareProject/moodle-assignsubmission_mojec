@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/assign/submission/mojec/db" VERSION="20161201" COMMENT="XMLDB file for Moodle mod/assign/submission/mojec"
+<XMLDB PATH="mod/assign/submission/mojec/db" VERSION="20170111" COMMENT="XMLDB file for Moodle mod/assign/submission/mojec"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../../lib/xmldb/xmldb.xsd"
 >
@@ -9,11 +9,12 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="assignment_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="submission_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="pathnamehash" TYPE="char" LENGTH="40" NOTNULL="false" SEQUENCE="false" COMMENT="The pathname hash of the uploaded file."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this submission info."/>
         <KEY NAME="fk_assignment" TYPE="foreign" FIELDS="assignment_id" REFTABLE="assign" REFFIELDS="id" COMMENT="The assignment instance this submission relates to"/>
-        <KEY NAME="fk_submission" TYPE="foreign" FIELDS="submission_id" REFTABLE="assign_submission" REFFIELDS="id"  COMMENT="The submission this file submission relates to."/>
+        <KEY NAME="fk_submission" TYPE="foreign" FIELDS="submission_id" REFTABLE="assign_submission" REFFIELDS="id" COMMENT="The submission this file submission relates to."/>
       </KEYS>
     </TABLE>
     <TABLE NAME="mojec_testresult" COMMENT="Info about the JUnit executor test results.">

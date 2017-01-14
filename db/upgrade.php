@@ -29,19 +29,24 @@ defined('MOODLE_INTERNAL') || die();
  * @return bool
  */
 function xmldb_assignsubmission_mojec_upgrade($oldversion) {
-    global $CFG;
+    global $DB;
 
-    // Moodle v2.8.0 release upgrade line.
-    // Put any upgrade step following this.
+    $dbman = $DB->get_manager();
 
-    // Moodle v2.9.0 release upgrade line.
-    // Put any upgrade step following this.
+    if ($oldversion < 2017011100) {
+        // Define field pathnamehash to be added to assignsubmission_mojec.
+        $table = new xmldb_table('assignsubmission_mojec');
+        $field = new xmldb_field('pathnamehash', XMLDB_TYPE_CHAR, '40', null, null, null, null, 'submission_id');
 
-    // Moodle v3.0.0 release upgrade line.
-    // Put any upgrade step following this.
+        // Conditionally launch add field pathnamehash.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
 
-    // Moodle v3.1.0 release upgrade line.
-    // Put any upgrade step following this.
+        // Mojec savepoint reached.
+        upgrade_plugin_savepoint(true, 2017011100, 'assignsubmission', 'mojec');
+    }
+
 
     return true;
 }

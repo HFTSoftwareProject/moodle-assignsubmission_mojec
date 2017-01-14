@@ -218,10 +218,15 @@ class assign_submission_mojec extends assign_submission_plugin {
             false);
 
         $mojecsubmission = $this->get_mojec_submission($submission->id);
+        $file = reset($files);
 
         if ($mojecsubmission) {
             // If there are old results, delete them.
             $this->delete_test_data($mojecsubmission->id);
+            if ($file->get_pathnamehash() != $mojecsubmission->pathnamehash) {
+                $mojecsubmission->pathnamehash = $file->get_pathnamehash();
+                $DB->update_record(self::TABLE_ASSIGNSUBMISSION_MOJEC, $mojecsubmission);
+            }
         } else {
             $mojecsubmission = new stdClass();
             $mojecsubmission->submission_id = $submission->id;
@@ -235,8 +240,7 @@ class assign_submission_mojec extends assign_submission_plugin {
             return true;
         }
 
-        // Get the file and post it to our backend.
-        $file = reset($files);
+        // Post file to our backend.
         $url = $wsbaseaddress . "/v1/task";
         $response = $this->mojec_post_file($file, $url, "taskFile");
 
