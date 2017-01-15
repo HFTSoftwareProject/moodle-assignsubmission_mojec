@@ -232,6 +232,7 @@ class assign_submission_mojec extends assign_submission_plugin {
             $mojecsubmission = new stdClass();
             $mojecsubmission->submission_id = $submission->id;
             $mojecsubmission->assignment_id = $this->assignment->get_instance()->id;
+            $mojecsubmission->pathnamehash = $file->get_pathnamehash();
             $mojecsubmission->id = $DB->insert_record(self::TABLE_ASSIGNSUBMISSION_MOJEC, $mojecsubmission);
         }
 
@@ -282,7 +283,7 @@ class assign_submission_mojec extends assign_submission_plugin {
             }
         }
 
-        $compilationerrors = $results->compilationErrors;
+        $compilationerrors = $jsonresponse->compilationErrors;
         foreach ($compilationerrors as $ce) {
             // Compilation error.
             $compilationerror = new stdClass();
